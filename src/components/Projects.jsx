@@ -14,18 +14,18 @@ export default function Projects() {
   const more = projects.filter((p) => !p.featured)
 
   return (
-    <section id="work" className="relative py-24 sm:py-32">
-      <div className="mx-auto w-full max-w-6xl px-5 sm:px-8">
+    <section id="work" className="section relative">
+      <div className="shell">
         <SectionHeading
-          index="00"
+          index="01"
           eyebrow="Selected work"
           title="Systems built to"
           accent="do real work"
-          description="Each one below started as a problem someone actually had. Open a case study for the problem, the approach, and what the model was actually doing."
+          description="Each one below started as a problem someone actually had. Open a case study for the problem, the approach, and what the model was really doing."
         />
 
         {/* Featured */}
-        <div className="mt-14 space-y-5">
+        <div className="mt-20 space-y-6">
           {featured.map((project, i) => (
             <ProjectCard
               key={project.id}
@@ -33,7 +33,7 @@ export default function Projects() {
               index={i}
               open={openId === project.id}
               onToggle={() => setOpenId(openId === project.id ? null : project.id)}
-              delay={i * 70}
+              delay={i * 80}
             />
           ))}
         </div>
@@ -42,13 +42,13 @@ export default function Projects() {
         {more.length > 0 && (
           <>
             <Reveal delay={120}>
-              <h3 className="mt-20 flex items-center gap-4 font-mono text-xs tracking-[0.2em] text-faint uppercase">
+              <h3 className="mt-28 flex items-center gap-6 font-mono text-[11px] tracking-[0.16em] text-faint uppercase">
                 Also built
-                <span className="h-px flex-1 bg-gradient-to-r from-edge-2 to-transparent" />
+                <span className="h-px flex-1 bg-line" />
               </h3>
             </Reveal>
 
-            <div className="mt-6 grid gap-5 md:grid-cols-2">
+            <div className="mt-10 grid gap-6 md:grid-cols-2">
               {more.map((project, i) => (
                 <ProjectCard key={project.id} project={project} index={featured.length + i} delay={i * 90} />
               ))}
@@ -57,17 +57,16 @@ export default function Projects() {
         )}
 
         <Reveal delay={140}>
-          <div className="mt-14 flex flex-col items-start gap-4 rounded-2xl border border-dashed border-edge-2 bg-surface/30 p-7 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mt-24 flex flex-col items-start justify-between gap-6 rounded-card border border-line p-9 sm:flex-row sm:items-center">
             <div>
-              <h3 className="text-lg font-semibold text-fg">There’s more in the repo</h3>
-              <p className="mt-1.5 text-sm text-dim">
+              <h3 className="text-xl font-light text-fg">There’s more in the repo</h3>
+              <p className="mt-2 max-w-md text-sm leading-relaxed text-dim">
                 Smaller tools, experiments, and the messy middle of shipping AI features.
               </p>
             </div>
             <Button as="a" href="https://github.com/" target="_blank" rel="noreferrer noopener" variant="outline">
               <Icon name="github" className="size-4" />
               Browse GitHub
-              <Icon name="arrowUpRight" className="size-4 transition-transform duration-300 group-hover:-translate-y-0.5" />
             </Button>
           </div>
         </Reveal>

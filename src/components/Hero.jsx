@@ -1,9 +1,8 @@
-import { profile, heroTerminal, socials, marqueeItems } from '@/data/portfolio'
+import { profile, socials, marqueeItems } from '@/data/portfolio'
 import { useTypewriter } from '@/hooks/useTypewriter'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 import Icon from './Icon'
 import Button from './ui/Button'
-import Terminal from './ui/Terminal'
 import Marquee from './ui/Marquee'
 import Reveal from './ui/Reveal'
 
@@ -18,131 +17,112 @@ export default function Hero() {
   const typed = useTypewriter(profile.taglineRotations, { enabled: !reduced })
 
   return (
-    <section id="top" className="relative flex min-h-svh flex-col justify-center pt-28 pb-14 sm:pt-32">
-      <div className="mx-auto w-full max-w-6xl px-5 sm:px-8">
-        <div className="grid items-center gap-14 lg:grid-cols-[1.05fr_0.95fr] lg:gap-10">
-          {/* ---------------- Left column ---------------- */}
-          <div>
-            <Reveal>
-              <a
-                href={profile.availabilityHref}
-                className="group inline-flex items-center gap-2.5 rounded-full border border-edge-2 bg-surface/60 py-1.5 pr-4 pl-2 backdrop-blur-sm transition-colors hover:border-accent-500/50"
-              >
-                <span className="relative grid size-5 place-items-center">
-                  <span className="absolute size-2 animate-pulse-ring rounded-full bg-emerald-400" />
-                  <span className="size-2 rounded-full bg-emerald-400" />
-                </span>
-                <span className="font-mono text-xs text-dim">{profile.availability}</span>
-              </a>
-            </Reveal>
+    <section id="top" className="relative flex min-h-svh flex-col justify-center pt-36 pb-16 sm:pt-40">
+      <div className="shell">
+        <div className="mx-auto max-w-4xl text-center">
+          {/* ---------------- Availability ---------------- */}
+          <Reveal>
+            <a
+              href={profile.availabilityHref}
+              className="group inline-flex items-center gap-2.5 rounded-pill border border-line px-4 py-2 transition-colors duration-300 hover:border-accent-muted"
+            >
+              <span className="relative grid size-4 place-items-center">
+                <span className="absolute size-2 animate-pulse-ring rounded-full bg-accent" />
+                <span className="size-2 rounded-full bg-accent" />
+              </span>
+              <span className="font-mono text-[11px] tracking-[0.14em] text-dim uppercase">{profile.availability}</span>
+            </a>
+          </Reveal>
 
-            <Reveal delay={80}>
-              <h1 className="mt-7 font-display text-[2.75rem] leading-[1.03] font-semibold tracking-tight sm:text-6xl lg:text-[4.25rem]">
-                <span className="block text-fg">{profile.name}</span>
-                <span className="mt-1.5 block text-lg font-normal tracking-tight text-dim sm:text-xl lg:text-2xl">
-                  {profile.role}
-                </span>
-              </h1>
-            </Reveal>
+          {/* ---------------- Name ---------------- */}
+          <Reveal delay={80}>
+            <h1 className="mt-9 text-[3.4rem] leading-[0.98] font-light tracking-[-0.035em] text-fg sm:text-[5rem] lg:text-[7rem]">
+              {profile.name}
+            </h1>
+          </Reveal>
 
-            {/* Typewriter tagline */}
-            <Reveal delay={160}>
-              <p className="mt-7 font-mono text-base text-accent-300 sm:text-lg">
-                <span className="select-none text-faint">&gt; </span>
-                {profile.tagline}
-                <span className="sr-only"> {profile.taglineRotations.join(' ')}</span>
-                <span aria-hidden="true" className="text-fg">
-                  {reduced ? profile.taglineRotations[0] : typed}
-                  <span className="ml-0.5 inline-block h-[1.05em] w-[0.5ch] translate-y-[0.18em] animate-blink bg-accent-400" />
-                </span>
-              </p>
-            </Reveal>
+          {/* ---------------- Role ---------------- */}
+          <Reveal delay={160}>
+            <p className="mt-5 text-lg font-light text-accent sm:text-xl lg:text-2xl">{profile.role}</p>
+          </Reveal>
 
-            <Reveal delay={240}>
-              <p className="mt-6 max-w-xl text-base leading-relaxed text-dim sm:text-lg">{profile.intro}</p>
-            </Reveal>
+          {/* ---------------- Typewriter tagline ---------------- */}
+          <Reveal delay={240}>
+            <p className="mt-9 font-mono text-[13px] text-dim sm:text-sm">
+              <span className="select-none text-accent-muted">&gt; </span>
+              <span className="sr-only"> {profile.taglineRotations.join(' ')}</span>
+              <span aria-hidden="true">
+                {reduced ? profile.taglineRotations[0] : typed}
+                <span className="ml-1 inline-block h-[1.05em] w-[0.5ch] translate-y-[0.16em] animate-blink bg-accent" />
+              </span>
+            </p>
+          </Reveal>
 
-            {/* CTAs */}
-            <Reveal delay={320}>
-              <div className="mt-9 flex flex-wrap items-center gap-3">
-                <Button as="a" href="#work" size="lg">
-                  View Work
-                  <Icon name="arrowRight" className="size-4 transition-transform duration-300 group-hover:translate-x-1" />
-                </Button>
-                <Button as="a" href="#contact" variant="outline" size="lg">
-                  Contact Me
-                </Button>
-                <Button as="a" href={profile.resumeUrl} variant="ghost" size="lg" download>
-                  <Icon name="download" className="size-4" />
-                  Résumé
-                </Button>
-              </div>
-            </Reveal>
+          {/* ---------------- Intro ---------------- */}
+          <Reveal delay={320}>
+            <p className="mx-auto mt-8 max-w-2xl text-[15px] leading-[1.85] text-dim sm:text-[17px]">{profile.intro}</p>
+          </Reveal>
 
-            {/* Socials */}
-            <Reveal delay={400}>
-              <div className="mt-9 flex flex-wrap items-center gap-x-5 gap-y-3">
-                {socials.map((social) => (
+          {/* ---------------- CTAs ---------------- */}
+          <Reveal delay={400}>
+            <div className="mt-12 flex flex-wrap items-center justify-center gap-3.5">
+              <Button as="a" href="#work" size="lg">
+                View work
+                <Icon name="arrowRight" className="size-4 transition-transform duration-300 group-hover:translate-x-1" />
+              </Button>
+              <Button as="a" href="#contact" variant="outline" size="lg">
+                Get in touch
+              </Button>
+              <Button as="a" href={profile.resumeUrl} variant="ghost" size="lg" download>
+                <Icon name="download" className="size-4" />
+                Résumé
+              </Button>
+            </div>
+          </Reveal>
+
+          {/* ---------------- Socials ---------------- */}
+          <Reveal delay={480}>
+            <ul className="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
+              {socials.map((social) => (
+                <li key={social.label}>
                   <a
-                    key={social.label}
                     href={social.url}
                     target={social.icon === 'mail' ? undefined : '_blank'}
                     rel="noreferrer noopener"
-                    className="group flex items-center gap-2 text-sm text-faint transition-colors hover:text-accent-300"
+                    className="link-underline group inline-flex items-center gap-2 font-mono text-xs text-faint transition-colors duration-300 hover:text-accent"
                   >
-                    <Icon name={social.icon} className="size-[18px] transition-transform duration-300 group-hover:-translate-y-0.5" />
-                    <span className="font-mono text-xs">{social.handle}</span>
+                    <Icon
+                      name={social.icon}
+                      className="size-[15px] transition-colors duration-300 group-hover:text-accent"
+                    />
+                    <span className="link-underline-on">{social.handle}</span>
                   </a>
-                ))}
-              </div>
-            </Reveal>
+                </li>
+              ))}
+            </ul>
+          </Reveal>
 
-            {/* Stats */}
-            <Reveal delay={480}>
-              <dl className="mt-11 grid max-w-lg grid-cols-3 gap-4 border-t border-edge/70 pt-7">
-                {STATS.map((stat) => (
-                  <div key={stat.label}>
-                    <dt className="sr-only">{stat.label}</dt>
-                    <dd>
-                      <span className="block font-display text-2xl font-semibold text-gradient sm:text-3xl">{stat.value}</span>
-                      <span className="mt-1 block text-xs leading-tight text-faint">{stat.label}</span>
-                    </dd>
-                  </div>
-                ))}
-              </dl>
-            </Reveal>
-          </div>
-
-          {/* ---------------- Right column ---------------- */}
-          <Reveal delay={200} className="relative">
-            {/* Glow pad behind the terminal */}
-            <div
-              aria-hidden="true"
-              className="absolute -inset-8 -z-10 rounded-[2rem] bg-gradient-to-br from-accent-600/22 via-glow/10 to-transparent blur-2xl"
-            />
-            <Terminal title={heroTerminal.title} lines={heroTerminal.lines} footer={heroTerminal.footer} />
-
-            {/* Floating chips */}
-            <div className="mt-5 grid grid-cols-2 gap-3 sm:mt-6">
-              {[
-                { icon: 'sparkle', label: 'LLM + RAG systems' },
-                { icon: 'terminal', label: 'Full-stack, end to end' },
-              ].map((chip) => (
-                <div
-                  key={chip.label}
-                  className="glass flex items-center gap-2.5 rounded-lg px-3.5 py-3 text-xs text-dim transition-colors hover:border-accent-500/40 hover:text-fg"
-                >
-                  <Icon name={chip.icon} className="size-4 shrink-0 text-accent-400" />
-                  {chip.label}
+          {/* ---------------- Stats ---------------- */}
+          <Reveal delay={560}>
+            <dl className="mx-auto mt-20 grid max-w-2xl grid-cols-3 gap-6 border-t border-line pt-12">
+              {STATS.map((stat) => (
+                <div key={stat.label}>
+                  <dt className="sr-only">{stat.label}</dt>
+                  <dd>
+                    <span className="block font-display text-3xl font-light text-fg sm:text-4xl">{stat.value}</span>
+                    <span className="mt-2 block text-[11px] leading-tight tracking-wide text-faint uppercase">
+                      {stat.label}
+                    </span>
+                  </dd>
                 </div>
               ))}
-            </div>
+            </dl>
           </Reveal>
         </div>
       </div>
 
-      {/* Capability marquee */}
-      <div className="mt-16 border-y border-edge/50 bg-base-2/40 py-3 sm:mt-20">
+      {/* ---------------- Capability marquee ---------------- */}
+      <div className="mt-28 border-y border-line/70 py-5">
         <Marquee items={marqueeItems} />
       </div>
     </section>

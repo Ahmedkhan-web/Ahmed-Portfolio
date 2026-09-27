@@ -5,20 +5,15 @@ export default function Footer() {
   const year = new Date().getFullYear()
 
   return (
-    <footer className="relative overflow-hidden border-t border-edge/70 bg-base-2/50">
-      <div className="mx-auto w-full max-w-6xl px-5 py-14 sm:px-8 sm:py-16">
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr]">
+    <footer className="relative overflow-hidden border-t border-line">
+      <div className="shell py-16 sm:py-20">
+        <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr]">
           {/* Brand */}
           <div>
-            <a href="#top" className="group inline-flex items-center gap-2.5">
-              <span className="grid size-8 place-items-center rounded-lg border border-accent-500/30 bg-accent-500/10 font-mono text-[13px] font-bold text-accent-300 transition-colors group-hover:border-accent-400/70">
-                AK
-              </span>
-              <span className="font-display text-[15px] font-semibold text-fg">
-                Ahmed<span className="text-accent-400">.</span>dev
-              </span>
+            <a href="#top" className="font-display text-lg font-normal tracking-tight text-fg">
+              Ahmed<span className="text-accent">.</span>dev
             </a>
-            <p className="mt-4 max-w-xs text-sm leading-relaxed text-faint">
+            <p className="mt-5 max-w-xs text-sm leading-[1.8] text-faint">
               Full-stack developer building AI-powered products — from retrieval pipelines to the boring parts that keep
               them online.
             </p>
@@ -26,16 +21,15 @@ export default function Footer() {
 
           {/* Navigate */}
           <nav aria-label="Footer">
-            <p className="font-mono text-[11px] tracking-[0.18em] text-dim uppercase">Navigate</p>
-            <ul className="mt-4 space-y-2.5">
+            <p className="font-mono text-[11px] tracking-[0.16em] text-dim uppercase">Navigate</p>
+            <ul className="mt-5 space-y-3">
               {navLinks.map((link) => (
                 <li key={link.id}>
                   <a
                     href={`#${link.id}`}
-                    className="group inline-flex items-center gap-1.5 text-sm text-faint transition-colors hover:text-accent-300"
+                    className="link-underline text-sm text-faint transition-colors duration-300 hover:text-accent"
                   >
-                    <span className="h-px w-0 bg-accent-400 transition-all duration-300 group-hover:w-3" />
-                    {link.label}
+                    <span className="link-underline-on">{link.label}</span>
                   </a>
                 </li>
               ))}
@@ -44,20 +38,17 @@ export default function Footer() {
 
           {/* Elsewhere */}
           <div>
-            <p className="font-mono text-[11px] tracking-[0.18em] text-dim uppercase">Elsewhere</p>
-            <ul className="mt-4 space-y-2.5">
+            <p className="font-mono text-[11px] tracking-[0.16em] text-dim uppercase">Elsewhere</p>
+            <ul className="mt-5 space-y-3">
               {socials.map((social) => (
                 <li key={social.label}>
                   <a
                     href={social.url}
                     target={social.icon === 'mail' ? undefined : '_blank'}
                     rel="noreferrer noopener"
-                    className="group inline-flex items-center gap-2 text-sm text-faint transition-colors hover:text-accent-300"
+                    className="inline-flex items-center gap-2.5 text-sm text-faint transition-colors duration-300 hover:text-accent"
                   >
-                    <Icon
-                      name={social.icon}
-                      className="size-4 transition-transform duration-300 group-hover:-translate-y-0.5"
-                    />
+                    <Icon name={social.icon} className="size-4" />
                     {social.label}
                   </a>
                 </li>
@@ -66,26 +57,20 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Oversized wordmark, clipped by the footer edge */}
-        <p
-          aria-hidden="true"
-          className="pointer-events-none mt-14 -mb-4 select-none text-center font-display text-[17vw] leading-none font-bold text-transparent opacity-[0.07] sm:-mb-6"
-          style={{ WebkitTextStroke: '1px var(--color-accent-400)' }}
-        >
-          AHMED KHAN
-        </p>
-
-        <div className="mt-8 flex flex-col-reverse items-center justify-between gap-4 border-t border-edge/60 pt-7 sm:flex-row">
+        <div className="mt-20 flex flex-col-reverse items-center justify-between gap-5 border-t border-line pt-8 sm:flex-row">
           <p className="text-center text-xs text-faint sm:text-left">
             © {year} {profile.name}. Built from scratch, no templates.
           </p>
 
           <a
             href="#top"
-            className="group inline-flex items-center gap-2 rounded-lg border border-edge-2 px-3.5 py-2 font-mono text-[11px] text-dim transition-colors hover:border-accent-500/50 hover:text-accent-300"
+            className="group inline-flex items-center gap-2.5 rounded-pill border border-line px-5 py-2.5 font-mono text-[11px] tracking-[0.1em] text-dim uppercase transition-colors duration-300 hover:border-accent-muted hover:text-accent"
           >
             Back to top
-            <Icon name="chevronDown" className="size-3.5 rotate-180 transition-transform duration-300 group-hover:-translate-y-0.5" />
+            <Icon
+              name="arrowRight"
+              className="size-3.5 -rotate-90 transition-transform duration-300 group-hover:-translate-y-0.5"
+            />
           </a>
         </div>
       </div>

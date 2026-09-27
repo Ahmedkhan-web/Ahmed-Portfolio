@@ -13,7 +13,6 @@
 export const profile = {
   name: 'Ahmed Khan',
   // TODO: Confirm spelling / add credentials (e.g. "Ahmed Khan, M.S. CS")
-  nameAccent: 'Ahmed Khan',
   role: 'Full-Stack Developer',
   // Short line that sits under the name, rotating through `taglineRotations`
   tagline: 'I build smart apps —',
@@ -385,21 +384,18 @@ export const testimonials = [
       'Ahmed took a vague idea and a spreadsheet of requirements and returned something we actually use every day. The AI part genuinely works — no demo-ware, no hand-holding, and he documented the failure cases better than our own team would have.',
     name: '[Client Name]', // TODO
     role: 'Founder, [Startup]', // TODO
-    accent: 'from-accent-500 to-indigo-glow',
   },
   {
     quote:
       'What stands out is the engineering judgement. He pushed back on two of my original ideas because they were the wrong shape, and he was right about both. Rare to get that from a contractor.',
     name: '[Colleague / CTO]', // TODO
     role: 'Engineering Lead', // TODO
-    accent: 'from-glow to-accent-500',
   },
   {
     quote:
       'We went from "we should probably add AI somewhere" to a working, evaluated feature in six weeks. Ahmed left us with documentation and tests we could maintain ourselves, which is the part I value most.',
     name: '[Client Name]', // TODO
     role: 'Product Lead', // TODO
-    accent: 'from-indigo-glow to-accent-400',
   },
 ]
 

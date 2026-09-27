@@ -81,184 +81,173 @@ export default function Contact() {
   }
 
   return (
-    <section id="contact" className="relative py-24 sm:py-32">
-      <div className="mx-auto w-full max-w-6xl px-5 sm:px-8">
-        <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
-          {/* ---------------- Pitch ---------------- */}
-          <div>
-            <SectionHeading
-              index="05"
-              eyebrow="Contact"
-              title="Let’s build something"
-              accent="worth shipping"
-              description="Got a product that needs an AI layer, a codebase that needs rescuing, or a role that needs filling? Tell me what’s actually broken. I read every message and reply within a day."
-            />
+    <section id="contact" className="section relative">
+      <div className="shell">
+        {/* Big centred pitch */}
+        <SectionHeading
+          index="06"
+          eyebrow="Contact"
+          title="Let’s build something"
+          accent="worth shipping"
+          align="center"
+          description="Got a product that needs an AI layer, a codebase that needs rescuing, or a role that needs filling? Tell me what’s actually broken. I read every message and reply within a day."
+        />
 
-            {/* Email w/ copy */}
+        {/* Direct channels */}
+        <Reveal delay={120}>
+          <div className="mx-auto mt-16 flex max-w-3xl flex-col items-center gap-4 sm:flex-row sm:justify-center">
+            <Button as="a" href={`mailto:${profile.email}`} size="lg">
+              <Icon name="mail" className="size-4" />
+              {profile.email}
+            </Button>
+
             <button
               type="button"
               onClick={copyEmail}
-              className="group mt-8 flex w-full max-w-md items-center justify-between gap-4 rounded-xl border border-edge-2 bg-surface/50 px-4 py-3.5 text-left transition-colors hover:border-accent-500/50"
+              className="group inline-flex items-center gap-2.5 rounded-pill border border-line px-6 py-3.5 font-mono text-[12px] tracking-[0.1em] text-dim uppercase transition-colors duration-300 hover:border-accent-muted hover:text-accent"
             >
-              <span className="flex min-w-0 items-center gap-3">
-                <Icon name="mail" className="size-4 shrink-0 text-accent-400" />
-                <span className="truncate font-mono text-sm text-dim">{profile.email}</span>
-              </span>
-              <span className="flex shrink-0 items-center gap-1.5 text-xs text-faint transition-colors group-hover:text-accent-300">
-                <Icon name={copied ? 'check' : 'copy'} className="size-3.5" />
-                {copied ? 'Copied' : 'Copy'}
-              </span>
+              <Icon name={copied ? 'check' : 'copy'} className="size-4" />
+              {copied ? 'Copied' : 'Copy address'}
             </button>
-
-            {/* Socials */}
-            <ul className="mt-8 space-y-1">
-              {socials.map((social) => (
-                <li key={social.label}>
-                  <a
-                    href={social.url}
-                    target={social.icon === 'mail' ? undefined : '_blank'}
-                    rel="noreferrer noopener"
-                    className="group flex items-center justify-between gap-4 rounded-lg border-b border-edge/60 py-3.5 text-sm text-dim transition-colors hover:border-accent-500/30 hover:text-fg"
-                  >
-                    <span className="flex items-center gap-3">
-                      <Icon
-                        name={social.icon}
-                        className="size-[18px] text-faint transition-colors group-hover:text-accent-300"
-                      />
-                      {social.label}
-                    </span>
-                    <span className="flex items-center gap-2 font-mono text-xs text-faint">
-                      {social.handle}
-                      <Icon
-                        name="arrowUpRight"
-                        className="size-3.5 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-                      />
-                    </span>
-                  </a>
-                </li>
-              ))}
-            </ul>
           </div>
+        </Reveal>
 
-          {/* ---------------- Form ---------------- */}
-          <Reveal delay={140}>
-            <div className="glass gradient-border-after relative overflow-hidden rounded-2xl p-6 sm:p-8">
-              {status === 'sent' ? (
-                <div className="flex min-h-96 flex-col items-center justify-center text-center">
-                  <span className="grid size-14 place-items-center rounded-full border border-emerald-400/30 bg-emerald-400/10">
-                    <Icon name="check" className="size-7 text-emerald-300" />
-                  </span>
-                  <h3 className="mt-5 font-display text-xl font-semibold text-fg">Message on its way</h3>
-                  <p className="mt-2 max-w-xs text-sm text-dim">
-                    Thanks for reaching out — I’ll get back to you within 24 hours.
-                  </p>
-                  <Button variant="outline" className="mt-7" onClick={() => setStatus('idle')}>
-                    Send another
-                  </Button>
-                </div>
-              ) : (
-                <form onSubmit={handleSubmit} noValidate className="space-y-5">
-                  <div className="grid gap-5 sm:grid-cols-2">
-                    <Field label="Name" error={errors.name} htmlFor="name">
-                      <input
-                        id="name"
-                        name="name"
-                        type="text"
-                        autoComplete="name"
-                        placeholder="Your name"
-                        value={values.name}
-                        onChange={update('name')}
-                        aria-invalid={Boolean(errors.name)}
-                        className={inputClass(errors.name)}
-                      />
-                    </Field>
+        <Reveal delay={180}>
+          <ul className="mx-auto mt-10 flex max-w-3xl flex-wrap items-center justify-center gap-x-8 gap-y-3">
+            {socials.map((social) => (
+              <li key={social.label}>
+                <a
+                  href={social.url}
+                  target={social.icon === 'mail' ? undefined : '_blank'}
+                  rel="noreferrer noopener"
+                  className="link-underline inline-flex items-center gap-2 font-mono text-xs text-faint transition-colors duration-300 hover:text-accent"
+                >
+                  <Icon name={social.icon} className="size-[15px]" />
+                  <span className="link-underline-on">{social.handle}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </Reveal>
 
-                    <Field label="Email" error={errors.email} htmlFor="email">
-                      <input
-                        id="email"
-                        name="email"
-                        type="email"
-                        autoComplete="email"
-                        placeholder="you@company.com"
-                        value={values.email}
-                        onChange={update('email')}
-                        aria-invalid={Boolean(errors.email)}
-                        className={inputClass(errors.email)}
-                      />
-                    </Field>
-                  </div>
-
-                  <Field label="What’s this about" htmlFor="projectType">
-                    <div className="relative">
-                      <select
-                        id="projectType"
-                        name="projectType"
-                        value={values.projectType}
-                        onChange={update('projectType')}
-                        className={`${inputClass(false)} appearance-none pr-10`}
-                      >
-                        {profile.projectTypes.map((type) => (
-                          <option key={type} value={type} className="bg-surface text-fg">
-                            {type}
-                          </option>
-                        ))}
-                      </select>
-                      <Icon
-                        name="chevronDown"
-                        className="pointer-events-none absolute top-1/2 right-3.5 size-4 -translate-y-1/2 text-faint"
-                      />
-                    </div>
-                  </Field>
-
-                  <Field
-                    label="Message"
-                    error={errors.message}
-                    htmlFor="message"
-                    hint={`${values.message.trim().length}/${MESSAGE_MIN} min`}
-                  >
-                    <textarea
-                      id="message"
-                      name="message"
-                      rows={5}
-                      placeholder="What are you building, and where does the AI fit?"
-                      value={values.message}
-                      onChange={update('message')}
-                      aria-invalid={Boolean(errors.message)}
-                      className={`${inputClass(errors.message)} resize-y`}
+        {/* Form */}
+        <Reveal delay={240}>
+          <div className="mx-auto mt-20 max-w-3xl rounded-card border border-line bg-surface p-7 sm:p-10">
+            {status === 'sent' ? (
+              <div className="flex min-h-80 flex-col items-center justify-center text-center">
+                <span className="grid size-14 place-items-center rounded-full border border-accent-muted bg-accent-wash">
+                  <Icon name="check" className="size-6 text-accent" />
+                </span>
+                <h3 className="mt-6 text-2xl font-light text-fg">Message on its way</h3>
+                <p className="mt-3 max-w-xs text-sm leading-relaxed text-dim">
+                  Thanks for reaching out — I’ll get back to you within 24 hours.
+                </p>
+                <Button variant="outline" className="mt-8" onClick={() => setStatus('idle')}>
+                  Send another
+                </Button>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} noValidate className="space-y-6">
+                <div className="grid gap-6 sm:grid-cols-2">
+                  <Field label="Name" error={errors.name} htmlFor="name">
+                    <input
+                      id="name"
+                      name="name"
+                      type="text"
+                      autoComplete="name"
+                      placeholder="Your name"
+                      value={values.name}
+                      onChange={update('name')}
+                      aria-invalid={Boolean(errors.name)}
+                      className={inputClass(errors.name)}
                     />
                   </Field>
 
-                  {status === 'error' && (
-                    <p role="alert" className="rounded-lg border border-amber-400/25 bg-amber-400/10 px-3.5 py-2.5 text-xs text-amber-200">
-                      Couldn’t send automatically — your mail app should have opened instead.
-                    </p>
-                  )}
+                  <Field label="Email" error={errors.email} htmlFor="email">
+                    <input
+                      id="email"
+                      name="email"
+                      type="email"
+                      autoComplete="email"
+                      placeholder="you@company.com"
+                      value={values.email}
+                      onChange={update('email')}
+                      aria-invalid={Boolean(errors.email)}
+                      className={inputClass(errors.email)}
+                    />
+                  </Field>
+                </div>
 
-                  <Button type="submit" size="lg" className="w-full" disabled={status === 'sending'}>
-                    {status === 'sending' ? (
-                      <>
-                        <span className="size-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                        Sending…
-                      </>
-                    ) : (
-                      <>
-                        Send message
-                        <Icon
-                          name="send"
-                          className="size-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-                        />
-                      </>
-                    )}
-                  </Button>
+                <Field label="What’s this about" htmlFor="projectType">
+                  <div className="relative">
+                    <select
+                      id="projectType"
+                      name="projectType"
+                      value={values.projectType}
+                      onChange={update('projectType')}
+                      className={`${inputClass(false)} appearance-none pr-10`}
+                    >
+                      {profile.projectTypes.map((type) => (
+                        <option key={type} value={type} className="bg-surface text-fg">
+                          {type}
+                        </option>
+                      ))}
+                    </select>
+                    <Icon
+                      name="chevronDown"
+                      className="pointer-events-none absolute top-1/2 right-4 size-4 -translate-y-1/2 text-faint"
+                    />
+                  </div>
+                </Field>
 
-                  <p className="text-center text-[11px] text-faint">
-                    No newsletter, no CRM. Your message goes to {profile.email} and nowhere else.
+                <Field
+                  label="Message"
+                  error={errors.message}
+                  htmlFor="message"
+                  hint={`${values.message.trim().length}/${MESSAGE_MIN} min`}
+                >
+                  <textarea
+                    id="message"
+                    name="message"
+                    rows={5}
+                    placeholder="What are you building, and where does the AI fit?"
+                    value={values.message}
+                    onChange={update('message')}
+                    aria-invalid={Boolean(errors.message)}
+                    className={`${inputClass(errors.message)} resize-y`}
+                  />
+                </Field>
+
+                {status === 'error' && (
+                  <p
+                    role="alert"
+                    className="rounded-control border border-amber-400/25 bg-amber-400/10 px-4 py-3 text-xs text-amber-200"
+                  >
+                    Couldn’t send automatically — your mail app should have opened instead.
                   </p>
-                </form>
-              )}
-            </div>
-          </Reveal>
-        </div>
+                )}
+
+                <Button type="submit" size="lg" className="w-full" disabled={status === 'sending'}>
+                  {status === 'sending' ? (
+                    <>
+                      <span className="size-4 animate-spin rounded-full border-2 border-current/30 border-t-current" />
+                      Sending…
+                    </>
+                  ) : (
+                    <>
+                      Send message
+                      <Icon name="send" className="size-4" />
+                    </>
+                  )}
+                </Button>
+
+                <p className="text-center text-[11px] leading-relaxed text-faint">
+                  No newsletter, no CRM. Your message goes to {profile.email} and nowhere else.
+                </p>
+              </form>
+            )}
+          </div>
+        </Reveal>
       </div>
     </section>
   )
@@ -267,23 +256,23 @@ export default function Contact() {
 /* -------------------------------------------------------------------------- */
 
 function inputClass(hasError) {
-  return `w-full rounded-lg border bg-base-2/70 px-3.5 py-3 text-sm text-fg placeholder:text-faint/70 transition-colors focus:bg-base-2 focus:outline-none ${
-    hasError ? 'border-red-400/60 focus:border-red-400' : 'border-edge-2 focus:border-accent-500/70'
+  return `w-full rounded-control border bg-surface-2 px-4 py-3.5 text-sm text-fg transition-colors duration-300 placeholder:text-faint/60 focus:bg-surface-3 focus:outline-none ${
+    hasError ? 'border-red-400/60 focus:border-red-400' : 'border-line focus:border-accent-muted'
   }`
 }
 
 function Field({ label, htmlFor, error, hint, children }) {
   return (
     <div>
-      <div className="mb-2 flex items-baseline justify-between gap-3">
-        <label htmlFor={htmlFor} className="font-mono text-[11px] tracking-[0.12em] text-faint uppercase">
+      <div className="mb-2.5 flex items-baseline justify-between gap-3">
+        <label htmlFor={htmlFor} className="font-mono text-[11px] tracking-[0.14em] text-faint uppercase">
           {label}
         </label>
         {hint && <span className="font-mono text-[10px] text-faint/80">{hint}</span>}
       </div>
       {children}
       {error && (
-        <p role="alert" className="mt-1.5 font-mono text-[11px] text-red-300">
+        <p role="alert" className="mt-2 font-mono text-[11px] text-red-300">
           {error}
         </p>
       )}
