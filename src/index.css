@@ -1,0 +1,448 @@
+@import 'tailwindcss';
+
+/* ============================================================
+   DESIGN TOKENS — the single source of truth for the site.
+   Dark-mode-first, emerald accent family. Retheme the whole
+   portfolio by editing the values in this block only.
+   ============================================================ */
+@theme {
+  /* ---- Typography -------------------------------------- */
+  /* Self-hosted variable fonts (see src/main.jsx) — no Google
+     Fonts request, no layout shift on load. Two families do all
+     the work: Space Grotesk carries every display size, Inter
+     carries body copy, and JetBrains Mono is reserved for the
+     uppercase micro-labels that give the page its technical
+     register. */
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Space Grotesk Variable', 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, 'SFMono-Regular', 'Cascadia Code', monospace;
+
+  /* ---- Surfaces ---------------------------------------- */
+  /* Near-black with a faint green cast so it sits with the
+     emerald accent instead of fighting it. */
+  --color-base: #050706;
+  --color-base-2: #080b0a;
+  --color-surface: #0c1211;
+  --color-surface-2: #111a18;
+
+  /* ---- Borders ----------------------------------------- */
+  --color-edge: #1b2422;
+  --color-edge-2: #28332f;
+
+  /* ---- Text -------------------------------------------- */
+  --color-fg: #f4f3ef; /* warm white */
+  --color-dim: #9aa5a1; /* soft gray */
+  --color-faint: #67716e;
+
+  /* ---- Accent — emerald --------------------------------- */
+  --color-accent-200: #a7f3d0;
+  --color-accent-300: #6ee7b7;
+  --color-accent-400: #34d399;
+  --color-accent-500: #10b981;
+  --color-accent-600: #059669;
+  --color-accent-700: #047857;
+
+  /* ---- Motion ------------------------------------------ */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* ---- Vertical rhythm ---------------------------------
+     Every vertical gap in the hero is one of these tokens, and each
+     is sized in `svh` as well as `rem`. On a tall screen they land
+     on the upper clamp bound; on a short laptop they compress
+     proportionally, so the hero keeps fitting inside 100svh instead
+     of spilling into a second screen. This is what makes the
+     composition hold at both 1920x1080 and 1366x660.
+
+     The hero is now centred rather than top-aligned, so these are
+     the only thing carrying its vertical scale: the block is free to
+     spend most of a tall screen on air, and the gaps are what stop a
+     short one from turning into a cramped stack. `sm` carries the
+     headline-to-typed-line and typed-line-to-CTA gaps, `md` the two
+     larger breaks, so one nudge resizes the whole composition. */
+  --spacing-gutter: clamp(1.5rem, 3.6svh, 3rem);
+  --spacing-rhythm-xs: clamp(0.5rem, 1.2svh, 0.8rem);
+  --spacing-rhythm-sm: clamp(0.85rem, 2svh, 1.6rem);
+  --spacing-rhythm-md: clamp(1.15rem, 3svh, 2.5rem);
+  --spacing-rhythm-lg: clamp(1.75rem, 4svh, 3.5rem);
+
+  /* ---- Profile card ---------------------------------------
+     A fixed rem width, not a viewport-derived one.
+
+     The card used to be sized from `100svh` so that its tall photo would keep
+     the hero inside a single screen. A circular avatar is square and a fixed
+     size, so the card's height no longer depends on its width at all — and
+     with it goes the whole calculation. The width is now free to be chosen on
+     its own terms.
+
+     It has since been opened up by half a rem at each end, because the card is
+     now read at a distance: the meta rows and the role line are its body copy,
+     and a line that has to wrap in a 272px panel is a line that reads as a
+     mistake. The floor is what guarantees the longest value — the email address
+     — still holds one line, and the ceiling keeps the panel from becoming a
+     second column of text beside the headline. */
+  --card-w: clamp(18rem, 18.5vw, 19.5rem);
+
+  /* ---- Avatar ---------------------------------------------
+     A fixed size at every breakpoint. This is the whole reason the card's
+     height is predictable: nothing about the photograph can push it around. */
+  --avatar: 7rem;
+  --avatar-lg: 8rem;
+
+  /* ---- Navigation clearance ------------------------------
+     The rail is `fixed` and runs down the right edge at every size, so these
+     reserve exactly the strip it occupies: a compact icon column on small
+     screens, a slightly larger rail from `lg` up. The hero's padding picks
+     these up, which is what keeps the navigation sitting outside the
+     composition instead of shoving the content inwards. */
+  --nav-clearance: 3.5rem;
+  --nav-clearance-lg: 6.5rem;
+
+  /* ---- Hero display size --------------------------------
+     Tracks viewport width, but is capped by viewport height so a
+     short-and-wide window shrinks the headline instead of
+     pushing the fold.
+
+     5.3vw is not a free number: the headline's widest line is
+     "Engineering Intelligent", and at `lg` the widest layout that
+     holds it on one line is 1024px, where the content column is
+     560px and that line measures 519px at 51px type. That is 93% of
+     the column, so the type can grow about 8% before the line
+     wraps and the two-line break stops being two lines. This sits
+     just inside that ceiling; raise it and measure.mjs will report
+     three headline rows at 1024x768. */
+  --text-hero: clamp(2.5rem, min(5.3vw, 9.2svh), 5.5rem);
+}
+
+/* ============================================================
+   KEYFRAMES
+   ============================================================ */
+
+/* Entrance used by <Reveal>. Translate + fade only — short, calm,
+   no overshoot. `--reveal-y` and `--reveal-delay` are set inline. */
+@keyframes reveal-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, var(--reveal-y, 22px), 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Typewriter caret. `steps(1)` makes it snap rather than ramp, so it reads as a
+   cursor being driven by the typewriter's clock instead of a soft glow. */
+@keyframes caret-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* The credibility strip at the foot of the hero — the one piece of motion on
+   the page that is not an entrance or the typewriter.
+
+   Half a track, not half a viewport: the strip renders its list of labels twice
+   and slides by exactly the width of one copy, so the second copy is already in
+   the position the first one started from and the loop has no seam. `translate`
+   rather than `transform` for the same reason the rest of the page treats them
+   as different things — a translate here cannot be inherited by, or overwrite,
+   any transform a hover or a reveal put on the element.
+
+   Linear on purpose. An eased marquee visibly speeds up and slows down at the
+   wrap point, which is the giveaway that it is a loop; linear reads as a
+   surface moving past rather than as an animation running. Slow enough that the
+   labels are readable as they travel. */
+@keyframes strip-drift {
+  from {
+    translate: 0 0;
+  }
+  to {
+    translate: -50% 0;
+  }
+}
+
+/* Slow breathing halo behind the availability dot. `transform: scale()` from a
+   fixed inset corner, so the ring grows evenly outward from the dot itself
+   rather than drifting down and right as a naive `scale` about the centre
+   would. */
+@keyframes status-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  70%,
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+/* ============================================================
+   BASE
+   ============================================================ */
+@layer base {
+  * {
+    border-color: var(--color-edge);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+
+    /* THE PAGE SCROLLS. This is the only scrollport on the site, and it is the
+       browser's own: no inner panel, no `overflow-y: auto` anywhere, no element
+       that has to be hovered or focused before a wheel gesture reaches the
+       content. Wheel, trackpad, touch, keyboard and the scrollbar itself all
+       drive this one scroller.
+
+       `smooth` here is what makes a rail link travel to its section instead of
+       teleporting, and it governs keyboard paging for the same reason.
+
+       Overridden in the accessibility block at the foot of this file, because a
+       visitor who has asked for reduced motion should not be sent on a long
+       eased journey by a link they pressed. */
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-base);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background-color: color-mix(in oklab, var(--color-accent-400) 32%, transparent);
+    color: #fff;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent-400);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+
+  /* NO SCROLLBAR STYLING, deliberately. A `::-webkit-scrollbar` block used to sit
+     here, painting a hairline thumb in the token palette, and `scrollbar-width`
+     / `scrollbar-color` would do the same job in Firefox. Both are gone.
+
+     This page has one scrollport and it is the document, so the one scrollbar a
+     visitor ever sees belongs to the browser: it is the platform's own control,
+     it is where users expect to find the page's length, and it is the only
+     scroll affordance that works without a pointer. Restyling it meant restyling
+     it everywhere, including the `::-webkit-scrollbar` in the horizontal strip
+     of a marquee that no longer exists, and none of it made the page easier to
+     read. Nothing here draws a scrollbar, a scroll track, or a scrollbar thumb
+     again. */
+}
+
+/* ============================================================
+   UTILITIES
+   ============================================================ */
+
+/* The avatar frame — a circle, and the guarantee that nothing is cropped.
+   Square, because that is the only shape a `rounded-full` box can fill without
+   distortion.
+
+   The photograph inside is `object-fit: contain`, not `cover`. That distinction
+   is the entire point: `cover` is what cropped the portrait in the first place,
+   and it would crop here too, shaving the top and bottom off the subject to fill
+   the circle. `contain` shows every pixel. The cost is that the photograph
+   (768:850) is slightly taller than the square, so a few percent of height is
+   left over at the top and bottom of the frame.
+
+   ProfileCard fills that remainder with a blurred, scaled copy of the same
+   photograph, which is why the frame can be square and contain the whole image
+   at once. */
+@utility avatar-frame {
+  aspect-ratio: 1 / 1;
+}
+
+/* Emerald gradient text — used for the accented headline line.
+   The small bottom padding keeps descenders from being clipped
+   once the text is painted into a clipped box. */
+@utility text-emerald-gradient {
+  background-image: linear-gradient(
+    98deg,
+    var(--color-accent-200) 0%,
+    var(--color-accent-400) 44%,
+    var(--color-accent-500) 100%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  padding-bottom: 0.06em;
+}
+
+/* The one sanctioned glow in the system. Kept in a single place
+   so every glowing element reads as the same light source. */
+@utility glow-emerald {
+  box-shadow:
+    inset 0 1px 0 0 color-mix(in oklab, var(--color-accent-200) 22%, transparent),
+    0 14px 40px -14px color-mix(in oklab, var(--color-accent-400) 58%, transparent);
+}
+
+@utility glow-emerald-hover {
+  &:hover,
+  &:focus-visible {
+    box-shadow:
+      inset 0 1px 0 0 color-mix(in oklab, var(--color-accent-200) 34%, transparent),
+      0 18px 48px -12px color-mix(in oklab, var(--color-accent-300) 68%, transparent);
+  }
+}
+
+/* Frosted panel for the profile card. */
+@utility glass-panel {
+  background-color: color-mix(in oklab, var(--color-surface) 58%, transparent);
+  backdrop-filter: blur(20px) saturate(120%);
+  -webkit-backdrop-filter: blur(20px) saturate(120%);
+}
+
+/* Soft edges on the credibility strip, so labels arrive and leave by fading
+   rather than by being cut off at the panel's boundary — the strip should read
+   as more of the page than it has an end to.
+
+   A mask rather than a pair of gradient overlays: an overlay would sit on top of
+   the type and tint the labels themselves at the edges, whereas a mask removes
+   them outright and leaves the text at full opacity everywhere it survives.
+
+   Both property spellings are written out. `mask-image` unprefixed is the
+   standard one and the prefixed form is what Safari and the older Chromium
+   builds still read; a mask that silently does nothing would leave the track
+   visibly sheared off at the right edge, which is exactly the look this exists
+   to prevent. */
+@utility strip-mask {
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 9%, #000 91%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 9%, #000 91%, transparent 100%);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+/* Denser variant for the navigation rail. It sits over the backdrop rather
+   than over content, so it needs a little more body to stay legible and
+   reads as a distinct, more utilitarian surface than the profile card. */
+@utility glass-rail {
+  background-color: color-mix(in oklab, var(--color-base-2) 72%, transparent);
+  backdrop-filter: blur(24px) saturate(130%);
+  -webkit-backdrop-filter: blur(24px) saturate(130%);
+}
+
+/* Where the rail lives.
+   A vertically centred column down the right edge at *every* size, not just
+   desktop. A bottom-docked pill was tried first and rejected on measurement: a
+   fixed bottom bar always overlays whatever happens to be at the bottom of the
+   viewport, and this hero is taller than the viewport, so on phones the pill sat
+   on top of fully visible body copy the moment the page loaded. It could only
+   be hidden by scrolling, which just moves the problem to the next paragraph.
+   A right-edge rail is beside the content rather than over it, so nothing is
+   ever covered and the hero only has to reserve the strip via --nav-clearance.
+
+   Centring uses auto margins rather than a transform, which keeps the rail
+   independent of the hover transitions on the links themselves. The rail is
+   short (seven icons), so at the shortest viewport in the brief it still clears
+   both edges. */
+@utility nav-rail {
+  position: fixed;
+  z-index: 30;
+  inset-block: 0;
+  inset-inline-start: auto;
+  right: 0.5rem;
+  margin-block: auto;
+  height: fit-content;
+  width: fit-content;
+  transition:
+    transform 320ms var(--ease-out-expo),
+    opacity 320ms var(--ease-out-expo);
+
+  @media (width >= 64rem) {
+    right: clamp(1rem, 2vw, 2.25rem);
+  }
+}
+
+/* Entrance animation, and the pending state it starts from.
+
+   THE PENDING STATE IS OPTICALLY EMPTY. `.reveal` starts at `opacity: 0` and
+   only runs the entrance once the component marks it `data-reveal="done"`, which
+   it does from an IntersectionObserver when the element reaches the viewport.
+   A single CSS animation running from mount could not do that: it would start the
+   moment the page loaded, so every block in About and Experience would have
+   finished animating — off screen, unseen — long before the reader scrolled to
+   it, and the section would simply arrive already still.
+
+   `backwards` (not `both`) is deliberate: it holds the `from` state during
+   the delay so nothing flashes early, then releases once the animation ends.
+   A `forwards` fill would keep re-applying `transform: none` at a higher
+   cascade origin than any hover rule, so an element could never respond to a
+   hover state that wanted its own transform.
+
+   The observer disconnects on the first intersection, so an element that has
+   arrived stays arrived: scrolling back up and down never replays it. */
+@utility reveal {
+  opacity: 0;
+
+  &[data-reveal='done'] {
+    /* `opacity: 1` is not redundant with the animation's `to` frame. The
+       animation uses `backwards` fill, so once it finishes it stops contributing
+       anything at all and the element falls back to its own declarations — which
+       here are the pending state's `opacity: 0`. Without this line every block
+       would fade up and then vanish. */
+    opacity: 1;
+    animation: reveal-rise 0.72s var(--ease-out-expo) backwards;
+    animation-delay: var(--reveal-delay, 0ms);
+  }
+}
+
+/* ============================================================
+   ACCESSIBILITY
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    /* Without this the entrance delay still applies and the
+       element stays invisible for its full stagger window. */
+    animation-delay: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+  /* The pending state in .reveal has to be undone here as well as the
+     animation. Setting `opacity: 1` on its own would still leave every
+     below-the-fold block waiting for an observer callback that this setting
+     means will never arrive. */
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* The duration overrides above cannot reach `scroll-behavior`: it is not an
+     animation or a transition, it is a keyword deciding how a scroll is
+     performed. Left alone it would keep easing the whole page for a visitor who
+     has asked for no motion at all, so a rail link would send them on a long
+     glide instead of a jump. Written here rather than in a utility, because the
+     scroller is `html` itself and is named as such. */
+  html {
+    scroll-behavior: auto;
+  }
+}

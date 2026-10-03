@@ -1,0 +1,38 @@
+{
+  "name": "ahmed-khan-portfolio",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint .",
+    "check:layout": "vite build && node scripts/measure.mjs",
+    "check:behaviour": "vite build && node scripts/verify.mjs",
+    "check:contrast": "vite build && node scripts/contrast.mjs",
+    "check:backdrop": "vite build && node scripts/backdrop.mjs",
+    "check:stats": "vite build && node scripts/check-stats.mjs",
+    "check": "npm run lint && npm run check:layout && npm run check:behaviour && npm run check:contrast && npm run check:backdrop && npm run check:stats"
+  },
+  "dependencies": {
+    "@fontsource-variable/inter": "^5.3.0",
+    "@fontsource-variable/jetbrains-mono": "^5.3.0",
+    "@fontsource-variable/space-grotesk": "^5.3.0",
+    "lucide-react": "^1.49.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@tailwindcss/vite": "^4.3.3",
+    "@vitejs/plugin-react": "^6.1.1",
+    "eslint": "^10.11.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.7",
+    "globals": "^17.12.0",
+    "playwright-core": "^1.63.0",
+    "tailwindcss": "^4.3.3",
+    "vite": "^8.3.1"
+  }
+}
