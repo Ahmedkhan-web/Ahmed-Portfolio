@@ -66,20 +66,27 @@ const ok = (label, cond, detail = '') => {
   if (!cond) fails.push(label)
 }
 
-// ---- 0. Entrance is driven by the viewport, plays once, and never replays ----
-/* Three separate claims, and each one fails differently:
+// ---- 0. Entrance is viewport-driven, and replays on every return ----------
+/* Four claims, and each one fails differently:
 
    1. AT LOAD, the blocks below the fold must still be hidden. A reveal that
       animates on the mount instead of on arrival finishes its stagger off
       screen, and the section then arrives already still — which looks exactly
       like working, and is the whole defect.
-   2. AFTER A PASS THROUGH THE PAGE, every block must have finished fully
-      visible and untransformed. Read after scrolling rather than after a fixed
-      wait, because a reveal that never fires leaves content permanently
-      invisible and only the scroll tells the difference.
-   3. AFTER A SECOND PASS, nothing may be animating again. Replays read as
-      flicker on the way back down the page, so this asserts the absence of
-      running animations on every revealed element. */
+   2. WHILE A BLOCK IS IN VIEW it must be fully visible and untransformed. This
+      is sampled per scroll step rather than at the end of the walk, because a
+      reveal that never fires leaves content permanently invisible and only the
+      walk tells the difference — and because an element that has been *passed*
+      is now expected to be hidden again, so an end-of-walk reading of the whole
+      page would be measuring the wrong thing.
+   3. LEAVING MUST RE-ARM. Scrolled past, a block takes its `data-reveal` off
+      again, which is what lets it play a second time. A reveal that stayed
+      `done` would pass every other check here while quietly breaking the one
+      behaviour the reader is meant to see.
+   4. THE SECOND PASS MUST ACTUALLY REPLAY — animations running again while the
+      blocks come back into view, rather than the whole page sliding past already
+      settled. Read as "did anything animate", not "is anything animating now":
+      by the time the walk finishes, nothing should be. */
 {
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } })
   await page.goto(TARGET, { waitUntil: 'load' })
@@ -104,39 +111,90 @@ const ok = (label, cond, detail = '') => {
 
   /* Walk down the page the way a reader would — in steps, not one jump — so
      each section's reveals arrive through its own observer rather than all at
-     once at the bottom. */
-  const readState = () =>
-    page.evaluate(() => {
-      const els = [...document.querySelectorAll('.reveal')]
-      return {
-        opacity: els.map((e) => +getComputedStyle(e).opacity),
-        transforms: els.map((e) => getComputedStyle(e).transform),
-        running: els.flatMap((e) => e.getAnimations()).filter((a) => a.playState === 'running').length,
-      }
-    })
+     once at the bottom.
 
+     Each step polls rather than sleeping once, for two reasons. A reveal is
+     `opacity: 0` for its whole `delay` — the animation's `backwards` fill holds
+     the `from` state — so the slowest block in About is invisible for 860ms and
+     then rises for 720ms; a single reading has to be taken after all of that,
+     or it reports pending blocks as failures. And whether anything is animating
+     is only true during the animation, so asking once at the end of the wait
+     would always answer "no" and the replay claim would be untestable. */
   const walk = async () =>
     page.evaluate(async () => {
       const d = document.scrollingElement
       const step = Math.round(document.documentElement.clientHeight * 0.5)
+      const arrivals = []
+      const failures = []
+      let peakRunning = 0
+
+      const running = () =>
+        [...document.querySelectorAll('.reveal')]
+          .flatMap((e) => e.getAnimations())
+          .filter((a) => a.playState === 'running').length
+
       for (let y = 0; y <= d.scrollHeight; y += step) {
         window.scrollTo({ top: y, behavior: 'instant' })
-        await new Promise((r) => setTimeout(r, 220))
+
+        const settle = 1900
+        const until = performance.now() + settle
+        while (performance.now() < until) {
+          peakRunning = Math.max(peakRunning, running())
+          await new Promise((r) => setTimeout(r, 80))
+        }
+
+        /* Anything wholly on screen has to be showing, which is the invariant
+           that catches both directions of the re-arm: a block that animated in
+           and was then re-armed while still visible, and a block that was never
+           marked because a scroll step jumped it clean over the trigger line. A
+           block *partly* off the top is expected to be hidden again — that is
+           what passing it did. */
+        const h = document.documentElement.clientHeight
+        for (const el of document.querySelectorAll('.reveal')) {
+          const r = el.getBoundingClientRect()
+          if (r.top < 0 || r.bottom > h) continue
+          arrivals.push(el)
+          const cs = getComputedStyle(el)
+          if (+cs.opacity !== 1 || cs.transform !== 'none') {
+            failures.push(`${el.tagName}.${String(el.className).split(' ')[0]} o=${cs.opacity} t=${cs.transform}`)
+          }
+        }
       }
+      return { arrived: arrivals.length, failures: failures.slice(0, 4), peakRunning }
     })
 
-  await walk()
-  await page.waitForTimeout(1600)
-  const arrived = await readState()
-  ok('every reveal reached opacity 1 once scrolled to', arrived.opacity.every((o) => o === 1), `(${arrived.opacity.length} elements)`)
-  ok('no reveal left transformed', arrived.transforms.every((t) => t === 'none'), `sample=${arrived.transforms.find((t) => t !== 'none')}`)
+  const first = await walk()
+  ok(
+    'every reveal is fully visible while it is in view',
+    first.failures.length === 0,
+    first.failures.length ? first.failures.join(' | ') : `(${first.arrived} arrivals checked)`,
+  )
 
+  /* Back to the top, where the blocks that were passed are now far below the
+     fold again. They should have handed their `data-reveal` back. */
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }))
-  await page.waitForTimeout(300)
-  await walk()
-  await page.waitForTimeout(400)
-  const second = await readState()
-  ok('reveals do not replay on a second pass', second.running === 0, `(${second.running} still animating)`)
+  await page.waitForTimeout(500)
+  const rearmed = await page.evaluate(() => {
+    const passed = [...document.querySelectorAll('#about .reveal, #experience .reveal')].filter(
+      (el) => el.getBoundingClientRect().top > 0,
+    )
+    return {
+      n: passed.length,
+      armed: passed.filter((el) => el.dataset.reveal === 'done').length,
+    }
+  })
+  ok(
+    'a block that has been passed re-arms itself',
+    rearmed.n > 0 && rearmed.armed === 0,
+    `(${rearmed.armed}/${rearmed.n} still marked done)`,
+  )
+
+  const second = await walk()
+  ok(
+    'the second pass plays the entrances again',
+    second.peakRunning > 0 && second.failures.length === 0,
+    `(${second.peakRunning} animations at peak)`,
+  )
   await page.close()
 }
 
@@ -162,13 +220,21 @@ const ok = (label, cond, detail = '') => {
   ok('all first-screen reveals reached opacity 1', vis.every((v) => v.o === 1), `(${vis.length} elements)`)
   ok('no first-screen reveal left transformed', vis.every((v) => v.tr === 'none'), `sample=${vis[0]?.tr}`)
 
-  // ---- 2. Hover: nothing moves, only colour and glow --------------------
+  // ---- 2. Hover: nothing moves, nothing glows, colour still reacts -------
   // The brief is explicit that the buttons stay fixed on hover — no lift, no
-  // press, no sliding arrow. So this asserts the absence of movement rather
-  // than its presence, and reads `translate` as well as `transform` because
+  // press, no sliding arrow — and that they do not light up under the pointer
+  // either. So this asserts the absence of both movement and glow rather than
+  // their presence, and reads `translate` as well as `transform` because
   // Tailwind v4 emits `-translate-y-*` as the standalone `translate` property.
   // Every CTA is checked, not just the card's: a hover rule is per-variant, and
   // one that passed on the primary would say nothing about the secondary.
+  //
+  // The glow assertions are the interesting half. "No glow" is a claim about a
+  // property that has to be absent, not merely unchanged: a button that merely
+  // stopped *animating* its shadow would pass a before/after comparison while
+  // still casting one, which is the thing the design brief rules out. So both
+  // states are required to be `none`, and the rest state is checked as well as
+  // the hovered one.
   //
   // Selected by accessible name, not by href. Both the rail and the hero own a
   // `mailto:` link and a `#contact` link, and the rail is rendered first, so a
@@ -184,6 +250,7 @@ const ok = (label, cond, detail = '') => {
         boxShadow: cs.boxShadow,
         color: cs.color,
         borderColor: cs.borderTopColor,
+        backgroundImage: cs.backgroundImage,
       }
     })
   const hover = async (locator) => {
@@ -220,12 +287,17 @@ const ok = (label, cond, detail = '') => {
       `transform ${before.transform}->${after.transform} | translate ${before.translate}->${after.translate}`,
     )
     ok(
-      `"${label}" still reacts to hover (colour or glow)`,
-      before.color !== after.color || before.borderColor !== after.borderColor || before.boxShadow !== after.boxShadow,
+      `"${label}" still reacts to hover (colour or fill)`,
+      before.color !== after.color ||
+        before.borderColor !== after.borderColor ||
+        before.backgroundImage !== after.backgroundImage,
+    )
+    ok(
+      `"${label}" casts no glow, at rest or hovered`,
+      before.boxShadow === 'none' && after.boxShadow === 'none',
+      `rest ${before.boxShadow} | hover ${after.boxShadow}`,
     )
     if (primary) {
-      ok('primary CTA glow is present at rest', before.boxShadow !== 'none')
-      ok('primary CTA glow intensifies on hover', before.boxShadow !== after.boxShadow)
       await page.screenshot({ path: join(SHOTS, 'hover-primary-cta.png') })
     }
   }

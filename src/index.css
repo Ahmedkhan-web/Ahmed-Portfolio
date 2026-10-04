@@ -65,6 +65,40 @@
   --spacing-rhythm-md: clamp(1.15rem, 3svh, 2.5rem);
   --spacing-rhythm-lg: clamp(1.75rem, 4svh, 3.5rem);
 
+  /* ---- Section content width ---------------------------------------
+     One cap for the body of every section under the hero, so About and
+     Experience are the same shape instead of two layouts that merely sit
+     near each other: `max-w-section` is the left edge and the right edge
+     of both sections at every viewport.
+
+     52rem rather than the full column. The content column runs 536px at
+     `lg` to about 950px on a wide desktop, and a line of body copy stretched
+     across 950px is 110 characters — a page of type, not a paragraph. Capping
+     it means the measure inside the cards and under the headings is the same
+     on every monitor, and the leftover width becomes symmetric margin, which
+     reads as margin on both sides instead of as unused space on one.
+
+     Below `lg` the column is narrower than this and the cap does nothing,
+     which is the intended behaviour: the token is a ceiling, not a target. */
+  --container-section: 52rem;
+
+  /* ---- Measure ---------------------------------------------------
+     The width of a single column of running text, and the one number that
+     keeps reading comfortable in both sections: About's paragraphs and
+     Experience's summaries and highlights are all `max-w-measure`, so no
+     paragraph on the page is set wider than any other.
+
+     Named `measure` rather than `prose` on purpose: Tailwind already ships a
+     `max-w-prose` at 65ch for its typography plugin, and silently redefining
+     a utility with that name to mean something else is how a class name stops
+     meaning what it says.
+
+     36rem of Inter at 15-16px measures 62-68 characters a line. Typography
+     sources put the comfortable band at 45-75; below about 45 the eye starts
+     losing the line on the return sweep, and past 75 the return sweep has too
+     far to travel. Anything wider than this cap is a bug, not a style. */
+  --container-measure: 36rem;
+
   /* ---- Profile card ---------------------------------------
      A fixed rem width, not a viewport-derived one.
 
@@ -166,10 +200,20 @@
   }
 }
 
-/* Slow breathing halo behind the availability dot. `transform: scale()` from a
+/* Slow breathing halo behind the availability dot, and behind the marker on the
+   current role in the timeline. `transform: scale()` from a
    fixed inset corner, so the ring grows evenly outward from the dot itself
    rather than drifting down and right as a naive `scale` about the centre
-   would. */
+   would.
+
+   The timeline ring inherits this keyframe rather than declaring a second one
+   that does the same thing: both are "something on this page is alive", and one
+   keyframe for that keeps the page's motion vocabulary to one entry.
+
+   `prefers-reduced-motion` collapses every animation on the page through the
+   accessibility block at the foot of this file, so the ring simply does not
+   expand for a visitor who has asked for no motion — it does not need a rule of
+   its own here, or a `motion-reduce:` override at every call site. */
 @keyframes status-pulse {
   0% {
     transform: scale(1);
@@ -193,6 +237,19 @@
   html {
     -webkit-text-size-adjust: 100%;
 
+    /* THE BASE COLOUR IS ON `html`, NOT ON `body`, and that placement is what
+       makes the background artwork visible at all. A background on the root
+       element becomes the canvas background, which is painted beneath every
+       layer in the document — including a `z-index: -10` fixed element. The same
+       fill on `body` is an ordinary block background, and in the root stacking
+       context block backgrounds paint *after* negative-`z` children, so it
+       covers the backdrop outright. Measured on the shipped build with the fill
+       on `body`: mean luminance 6.5/255 and 0% of the frame lit, at every
+       viewport — the artwork was not dim, it was not being painted. On `html` the
+       same frame measures 14.7 with 10.5% lit.
+
+       `scroll-behavior` and the rest of the page setup are below. */
+
     /* THE PAGE SCROLLS. This is the only scrollport on the site, and it is the
        browser's own: no inner panel, no `overflow-y: auto` anywhere, no element
        that has to be hovered or focused before a wheel gesture reaches the
@@ -206,10 +263,10 @@
        visitor who has asked for reduced motion should not be sent on a long
        eased journey by a link they pressed. */
     scroll-behavior: smooth;
+    background-color: var(--color-base);
   }
 
   body {
-    background-color: var(--color-base);
     color: var(--color-fg);
     font-family: var(--font-sans);
     font-synthesis-weight: none;
@@ -293,23 +350,6 @@
   -webkit-background-clip: text;
   color: transparent;
   padding-bottom: 0.06em;
-}
-
-/* The one sanctioned glow in the system. Kept in a single place
-   so every glowing element reads as the same light source. */
-@utility glow-emerald {
-  box-shadow:
-    inset 0 1px 0 0 color-mix(in oklab, var(--color-accent-200) 22%, transparent),
-    0 14px 40px -14px color-mix(in oklab, var(--color-accent-400) 58%, transparent);
-}
-
-@utility glow-emerald-hover {
-  &:hover,
-  &:focus-visible {
-    box-shadow:
-      inset 0 1px 0 0 color-mix(in oklab, var(--color-accent-200) 34%, transparent),
-      0 18px 48px -12px color-mix(in oklab, var(--color-accent-300) 68%, transparent);
-  }
 }
 
 /* Frosted panel for the profile card. */
@@ -396,8 +436,9 @@
    cascade origin than any hover rule, so an element could never respond to a
    hover state that wanted its own transform.
 
-   The observer disconnects on the first intersection, so an element that has
-   arrived stays arrived: scrolling back up and down never replays it. */
+   The observer disconnects when the element unmounts, and nothing else: it is
+   not closed on arrival, so leaving the viewport takes `data-reveal` back off
+   and the entrance is armed again for the next time the reader comes to it. */
 @utility reveal {
   opacity: 0;
 

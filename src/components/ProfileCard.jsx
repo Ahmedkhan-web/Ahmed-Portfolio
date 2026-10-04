@@ -73,7 +73,7 @@ export default function ProfileCard() {
             />
 
             {/* Emerald rim, brightest along the top edge, so the circle reads
-                as lit from the same direction as the glow on the buttons. */}
+                as lit from the same direction as the fill on the buttons. */}
             <span
               aria-hidden="true"
               className="pointer-events-none absolute inset-0 rounded-full bg-[linear-gradient(160deg,rgba(110,231,183,0.28),transparent_46%)]"

@@ -113,7 +113,8 @@ export default function Hero() {
             side-by-side buttons at 360px would leave neither of them enough
             room for its own label.
 
-            Neither button moves on hover — colour and glow only. */}
+            Neither button moves or glows on hover — the fill's colour stops
+            and the border are the whole response. */}
         <div className="mt-rhythm-md flex w-full flex-col items-stretch gap-3 sm:w-auto sm:flex-row sm:items-center sm:gap-3.5">
           <Button
             href={hero.primaryCta.href}

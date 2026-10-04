@@ -5,20 +5,32 @@
  *  `1em` so an icon tracks its label's size and the two can never drift apart.
  *
  *  NOTHING MOVES ON HOVER. No lift, no press, and the trailing arrow holds
- *  still too — the only things that change are colour and glow. That is a
- *  deliberate constraint rather than an omission: a translating hover target
- *  is motion the visitor did not ask for, and on a hero it is the thing that
- *  makes the composition feel restless. Every animated property is named
- *  explicitly below, because leaving `transform` out of the list is what makes
- *  "static" a guarantee rather than a hope.
+ *  still too. That is a deliberate constraint rather than an omission: a
+ *  translating hover target is motion the visitor did not ask for, and on a hero
+ *  it is the thing that makes the composition feel restless. Every animated
+ *  property is named explicitly below, because leaving `transform` out of the
+ *  list is what makes "static" a guarantee rather than a hope.
+ *
+ *  NOTHING GLOWS EITHER — not at rest and not under the pointer. The hero's two
+ *  buttons and the card's are all this component, so the rule is one rule for
+ *  the three of them: hover changes the fill's colour stops and the border, and
+ *  that is the whole response.
+ *
+ *  The glow used to be the page's `glow-emerald` utility, applied at rest and
+ *  deepened by `glow-emerald-hover`. It was dropped because on this background
+ *  it was not a highlight but a second light source: the artwork behind the page
+ *  is already an emerald glow, so a lit button read as a hole in it rather than
+ *  as a control, and the effect was strongest exactly where the composition is
+ *  busiest — under the headline, and on a card that is itself frosted glass
+ *  catching the same light. The buttons are the only saturated fill on the
+ *  screen; they do not need a shadow to be found.
  * ==========================================================================*/
 
 const VARIANTS = {
-  /* Emerald, dark label, single restrained glow that lifts on hover. The
-     vertical gradient keeps the top edge reading as lit without adding a
-     second shadow layer on top of the sanctioned glow. */
+  /* Emerald with a dark label. The vertical gradient keeps the top edge reading
+     as lit without adding a shadow layer on top of it. */
   primary:
-    'glow-emerald glow-emerald-hover bg-gradient-to-b from-accent-300 to-accent-500 ' +
+    'bg-gradient-to-b from-accent-300 to-accent-500 ' +
     'text-[#04120b] font-semibold hover:from-accent-200 hover:to-accent-400',
   /* Transparent with a hairline border; picks up a green cast on hover. */
   secondary:
@@ -48,9 +60,10 @@ export default function Button({
     'group relative inline-flex select-none items-center justify-center rounded-full',
     /* Background-image carries the primary's vertical gradient, so it is in the
        transition list alongside the colour properties — without it the fill
-       would snap while everything else eased. No `transform` and no
-       `translate`: those are what a lift would animate. */
-    'transition-[background-image,background-color,border-color,color,box-shadow] duration-300 ease-out motion-reduce:transition-none',
+       would snap while everything else eased. No `transform`, no `translate`:
+       those are what a lift would animate, and no `box-shadow` either, because
+       nothing here casts one. */
+    'transition-[background-image,background-color,border-color,color] duration-300 ease-out motion-reduce:transition-none',
     SIZES[size],
     VARIANTS[variant],
     spread && 'w-full justify-between',

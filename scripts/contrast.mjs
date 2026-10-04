@@ -68,6 +68,20 @@ const sample = async (group) => {
     const tr = range.getBoundingClientRect()
     const r = tr.height && tr.width ? tr : el.getBoundingClientRect()
 
+    /* An element outside the captured viewport has no pixels in this screenshot.
+       Sampling it anyway reads the empty surface where it would have been, and
+       reports 1.04 — a false failure for text that is perfectly legible, and on
+       a different layout the same blind spot could have been a false pass. So
+       each pass only reports what it can genuinely see, and the caller merges a
+       pass aligned to the top of the section with one aligned to its bottom.
+
+       Required to be *fully* in view rather than partly: a text line clipped by
+       the viewport edge has its glyph box cut, and the modal-colour background
+       estimate is only trustworthy over a whole line. */
+    const vh = window.innerHeight
+    const vw = window.innerWidth
+    if (r.top < 2 || r.bottom > vh - 2 || r.left < 2 || r.right > vw - 2) return { label, offscreen: true }
+
     // `inset` trims the top/bottom of the box so a neighbouring line's
     // descenders don't contaminate the sample.
     const top = r.top + r.height * inset
@@ -144,10 +158,22 @@ const sample = async (group) => {
     ]
   }
 
-  /* The About and Experience sections reuse the same palette at new sizes and on
-     new surfaces — `text-dim` body copy over the backdrop, `text-fg/90` on the
-     lede, `text-faint` micro-labels — and the faintest of those is exactly where
-     a palette that passes at 18px can still fail at 13px. */
+/* The About and Experience sections reuse the same palette at new sizes and on
+     new surfaces — `text-dim` body copy over the backdrop, `text-fg/85` on the
+     lede, `text-dim` micro-labels — and the faintest of those is exactly where
+     a palette that passes at 18px can still fail at 13px.
+
+     The About body is two bands: prose (with the figures in the margin from
+     `xl`), then the capability grid. Each has its own smallest text, and each is
+     sampled — a check that only looked at the prose would pass while the 10px
+     ledger labels went unmeasured.
+
+     These are also the checks that stand between the background artwork and the
+     body copy. The image is now genuinely painted under every section rather than
+     hidden behind the page's base fill, so the emerald in it sits behind long
+     stretches of `text-dim` at 16px. The samples below are real pixels from the
+     rendered page, not the palette's hex values, which is the only way a
+     background like this can be held to a number. */
   if (group === 'about') {
     return [
       measure('#about h2 > span', 'about headline line', { index: 0, inset: 0.25, min: 3 }),
@@ -157,6 +183,11 @@ const sample = async (group) => {
          heading component, above the two body paragraphs. */
       measure('#about p', 'about lede', { index: 0, inset: 0.2 }),
       measure('#about p', 'about body paragraph', { index: 2, inset: 0.2 }),
+      /* The margin ledger: a 28px display figure (large text, 3:1) over a 10px
+         mono label (4.5:1). The two are the same size pair as the hero's stat
+         row, at a third of the scale. */
+      measure('#about dl dt', 'ledger label', { index: 0, inset: 0.2, min: 4.5 }),
+      measure('#about dl dd', 'ledger figure', { index: 0, inset: 0.3, min: 3 }),
       measure('#about h3', 'capability row title', { index: 0, inset: 0.2, min: 3 }),
       measure('#about li p', 'capability row body', { index: 0, inset: 0.2 }),
     ]
@@ -180,39 +211,83 @@ const results = [...(await sample('hero'))]
 /* Scroll the centre column to each section, wait for the entrance animation to
    finish so nothing is sampled mid-fade, then sample that section against its
    own pixels. `behavior: 'instant'` because the check wants the end position, not
-   a frame of the journey. */
+   a frame of the journey.
+
+   TWO PASSES PER SECTION. About and Experience are both taller than the 900px
+   column at `lg` — About is five bands of content, not three paragraphs — and one
+   screenshot cannot contain all of it. Aligned to the top of the section, its
+   lower rows are below the fold, where they have correctly not been revealed yet,
+   so their text is not in the image at all. So each section is sampled twice,
+   aligned to its top and then to its bottom, and the two sets merged.
+
+   That is not a loosening. Every measurement still comes from a screenshot in
+   which the text is genuinely painted, and a selector that neither pass could see
+   is reported as NOT FOUND — a failure — rather than quietly dropped. The old
+   single pass could not tell the difference between "no contrast" and "not
+   photographed", and reported both as 1.04. */
 for (const id of ['about', 'experience']) {
-  await page.evaluate((target) => {
-    document.getElementById(target).scrollIntoView({ behavior: 'instant' })
-  }, id)
-  /* Wait for the section's entrances to finish rather than for a fixed time.
-     Every block is revealed by an observer as it arrives, so a section that has
-     just been scrolled to has not started animating yet, and its stagger has not
-     been counted      yet either — sampling on a timer would measure whichever frames
-     happened to fall inside it. The predicate has to ask about the reveals
+  /* Scoped to what is on screen, because a scroll only reveals what arrives in
+     the viewport; waiting on the whole section would time out on the rows that
+     are still below the fold. The predicate has to ask about the reveals
      themselves: `getAnimations()` alone is empty for a frame or two after the
      scroll, before the observer callback runs, so it reports "settled" while the
-     whole section is still at zero and would go on to measure invisible text.
+     whole section is still at zero and would go on to measure invisible text. */
+  const waitForArrivedReveals = () =>
+    page.waitForFunction(
+      (target) => {
+        const inView = [...document.querySelectorAll(`#${target} .reveal`)].filter((el) => {
+          const r = el.getBoundingClientRect()
+          return r.top < window.innerHeight * 0.9 && r.bottom > 0
+        })
+        return (
+          inView.length > 0 &&
+          inView.every((el) => el.dataset.reveal === 'done' && +getComputedStyle(el).opacity === 1)
+        )
+      },
+      id,
+      { timeout: 8000, polling: 100 },
+    )
 
-     Scoped to what is on screen, because scrolling a section to the top of a
-     900px column leaves its lower rows below the fold — where, correctly, they
-     are still waiting to be revealed. Waiting on those too would time out. */
-  await page.waitForFunction(
-    (target) => {
-      const inView = [...document.querySelectorAll(`#${target} .reveal`)].filter((el) => {
-        const r = el.getBoundingClientRect()
-        return r.top < window.innerHeight * 0.9 && r.bottom > 0
-      })
-      return (
-        inView.length > 0 &&
-        inView.every((el) => el.dataset.reveal === 'done' && +getComputedStyle(el).opacity === 1)
-      )
-    },
-    id,
-    { timeout: 8000, polling: 100 },
-  )
-  await page.waitForTimeout(250)
-  results.push(...(await sample(id)))
+  /* Keyed by label so the order the selectors were declared in survives the merge
+     rather than depending on which pass happened to run last. `declared` keeps
+     every label either pass returned, including the ones it could not see. */
+  const collected = new Map()
+  const declared = new Set()
+  const order = []
+
+  for (const edge of ['start', 'end']) {
+    await page.evaluate(
+      ({ target, edge }) => {
+        const el = document.getElementById(target)
+        const box = el.getBoundingClientRect()
+        const top = box.top + window.scrollY
+        /* `end` puts the section's last pixel at the bottom of the column. If the
+           section is the last thing in the document, or shorter than the column,
+           `scrollTo` clamps to the maximum and the section is fully visible
+           anyway — so this needs no special case for either. */
+        window.scrollTo({
+          top: Math.max(0, Math.round(edge === 'start' ? top : top + box.height - window.innerHeight)),
+          behavior: 'instant',
+        })
+      },
+      { target: id, edge },
+    )
+    await waitForArrivedReveals()
+    await page.waitForTimeout(250)
+
+    for (const r of await sample(id)) {
+      declared.add(r.label)
+      if (r.offscreen) continue
+      if (!collected.has(r.label)) order.push(r.label)
+      collected.set(r.label, r)
+    }
+  }
+
+  /* Anything no pass could photograph is a failure, not an omission: if a
+     selector stops matching, or its element ends up taller than the column can
+     ever show, this is where it has to say so. */
+  for (const label of order) results.push(collected.get(label))
+  for (const label of declared) if (!order.includes(label)) results.push({ label, missing: true })
 }
 
 const pad = (s, n) => String(s).padEnd(n)

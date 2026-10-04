@@ -111,6 +111,7 @@ export const navIconsPending = { projects: FolderGit2, skills: Wrench, 'ai-lab':
  * -------------------------------------------------------------------------*/
 export const about = {
   eyebrow: 'About',
+
   /* The heading is the first thing read in this section, so it states the
      outcome rather than the job title — "About" is what the rail says. */
   headline: ['I build software', 'that survives contact', 'with real users.'],
@@ -123,6 +124,29 @@ export const about = {
     'Five years, thirty-five projects, twenty clients. Most of that time has gone into the join between the back end and the interface, which is where a product either holds together or quietly starts to leak.',
     'My defaults are unglamorous and they are why the work ages well: performance budgets agreed before the build, typed boundaries at every layer, and tests around the logic that actually breaks.',
   ],
+
+  /* The ledger that sits beside the prose: the three figures the lede above
+     already states, set as a spec sheet.
+
+     `metrics` names each figure by the label it already has in `hero.stats`
+     rather than repeating the number. The hero states these three as a row of
+     large display figures; the About states them as a ledger. Same facts, two
+     registers — and because the value is resolved from `hero.stats` at render
+     time rather than written out here, the two cannot drift apart into two
+     different numbers for the same thing. A `stat` that names nothing throws
+     rather than rendering a blank, in the same spirit as `capabilityIcon` below.
+
+     "Technologies" is deliberately absent: the `stack` fields of the Experience
+     entries are the informative version of that figure, a screen further down,
+     and printing the count beside them as well would only invite the reader to
+     check the arithmetic. */
+  practice: {
+    metrics: [
+      { label: 'Projects delivered', stat: 'Projects' },
+      { label: 'Clients', stat: 'Clients' },
+      { label: 'Years of experience', stat: 'Years Experience' },
+    ],
+  },
 
   /* Four capability rows. `icon` resolves against `capabilityIcon` below, so
      adding a row means adding a line there and a line here. */
