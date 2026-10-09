@@ -123,11 +123,12 @@
   --avatar-lg: 8rem;
 
   /* ---- Navigation clearance ------------------------------
-     The rail is `fixed` and runs down the right edge at every size, so these
-     reserve exactly the strip it occupies: a compact icon column on small
-     screens, a slightly larger rail from `lg` up. The hero's padding picks
-     these up, which is what keeps the navigation sitting outside the
-     composition instead of shoving the content inwards. */
+     The rail is `fixed` down the right edge from `lg` up, so `--nav-clearance-lg`
+     reserves exactly the strip it occupies and keeps the navigation sitting
+     outside the composition instead of shoving the content inwards. Phones no
+     longer need a strip: the rail is hidden there and the menu lives in a top
+     bar, so the page gutters are symmetric. `--nav-clearance` is kept as the
+     measure script's fallback value. */
   --nav-clearance: 3.5rem;
   --nav-clearance-lg: 6.5rem;
 
@@ -223,6 +224,30 @@
   100% {
     transform: scale(2.6);
     opacity: 0;
+  }
+}
+
+/* The mobile navigation menu. The overlay dims and the panel drops in a few
+   pixels from the top edge, so the menu reads as descending from the button
+   that opened it rather than simply appearing. Reduced motion collapses both
+   through the global block at the foot of this file. */
+@keyframes nav-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes nav-pop {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }
 
@@ -389,14 +414,19 @@
 }
 
 /* Where the rail lives.
-   A vertically centred column down the right edge at *every* size, not just
-   desktop. A bottom-docked pill was tried first and rejected on measurement: a
-   fixed bottom bar always overlays whatever happens to be at the bottom of the
-   viewport, and this hero is taller than the viewport, so on phones the pill sat
-   on top of fully visible body copy the moment the page loaded. It could only
-   be hidden by scrolling, which just moves the problem to the next paragraph.
-   A right-edge rail is beside the content rather than over it, so nothing is
-   ever covered and the hero only has to reserve the strip via --nav-clearance.
+   A vertically centred column down the right edge, from `lg` up. On phones the
+   rail is hidden (`hidden lg:block` in NavRail) and a compact top bar with a
+   menu button takes its place — a strip of icons down the edge was too small a
+   target on a touch screen, which is why the mobile presentation is a menu
+   rather than a slimmer version of the same rail.
+
+   The right-edge placement is still the desktop answer. A bottom-docked pill
+   was tried first and rejected on measurement: a fixed bottom bar always
+   overlays whatever happens to be at the bottom of the viewport, and this hero
+   is taller than the viewport, so the pill sat on top of fully visible body copy
+   the moment the page loaded. A right-edge rail is beside the content rather
+   than over it, so nothing is ever covered and the shell only has to reserve the
+   strip via --nav-clearance-lg.
 
    Centring uses auto margins rather than a transform, which keeps the rail
    independent of the hover transitions on the links themselves. The rail is

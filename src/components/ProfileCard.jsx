@@ -21,23 +21,23 @@ export default function ProfileCard() {
       delay={0}
       y={28}
       aria-label="Profile"
-      /* Capped rather than viewport-scaled so the card never outgrows a tablet,
-         and a fixed rem width from `lg` up (see `--card-w`) so its height stays
-         predictable — which is what lets the shell centre it on the viewport. */
-      className="w-full max-w-[27rem] lg:w-[var(--card-w)] lg:max-w-none lg:shrink-0"
+      /* One width token at every size: `--card-w` is the cap on phones and the
+         fixed width from `lg` up, so the card is the same object on a phone and
+         a desktop rather than two layouts that merely sit near each other. */
+      className="w-full max-w-[var(--card-w)] lg:w-[var(--card-w)] lg:max-w-none lg:shrink-0"
     >
-      <div className="glass-panel relative overflow-hidden rounded-[22px] border border-white/[0.07] p-4 shadow-[0_36px_90px_-40px_rgba(0,0,0,0.95)] sm:p-5 lg:rounded-[26px] lg:p-6">
+      <div className="glass-panel relative overflow-hidden rounded-[26px] border border-white/[0.07] p-5 shadow-[0_36px_90px_-40px_rgba(0,0,0,0.95)] sm:p-6">
         <span
           aria-hidden="true"
           className="pointer-events-none absolute -right-20 -top-20 size-44 rounded-full bg-accent-400/[0.08] blur-3xl"
         />
         {/* ---- Identity header -------------------------------------------
-            Phones lay it on its side — circle beside the name — because a
-            stacked card is far taller than a phone needs. From `lg` the card
-            goes upright and centred, which is what a circular portrait wants:
-            a circle has no edges to bleed into, so centring it above the name
-            is the only arrangement that reads as deliberate. */}
-        <div className="flex items-center gap-4 lg:flex-col lg:gap-0">
+            Upright and centred at every width. The card used to lay on its side
+            on phones — circle beside the name — but a single presentation reads
+            as the same object wherever it is opened, and a circle has no edges
+            to bleed into, so centring it above the name is the arrangement that
+            reads as deliberate. */}
+        <div className="flex flex-col items-center">
           {/* ---- Avatar ---------------------------------------------------
               Square frame, `rounded-full`, sized in fixed rem at every
               breakpoint so the portrait is identical on a 360px phone and a
@@ -51,7 +51,7 @@ export default function ProfileCard() {
               the circle shows the complete photograph with no empty band and,
               critically, with nothing cropped. */}
           <div
-            className="group/portrait relative size-[var(--avatar)] shrink-0 overflow-hidden rounded-full ring-1 ring-white/[0.09] lg:size-[var(--avatar-lg)]"
+            className="group/portrait relative size-[var(--avatar-lg)] shrink-0 overflow-hidden rounded-full ring-1 ring-white/[0.09]"
             style={{ boxShadow: '0 18px 40px -18px rgba(0,0,0,0.85)' }}
           >
             <img
@@ -88,7 +88,7 @@ export default function ProfileCard() {
               The name is the largest type in the card and the only thing here
               set in the display face: it is read at a glance from across a room,
               so it is given the size and the tracking the headline uses. */}
-          <div className="min-w-0 flex-1 text-left lg:mt-4 lg:flex lg:w-full lg:flex-col lg:items-center lg:text-center">
+          <div className="mt-4 flex w-full min-w-0 flex-col items-center text-center">
             <span className="inline-flex items-center gap-2 rounded-full border border-accent-400/20 bg-accent-400/[0.07] px-3 py-1 text-[11.5px] font-medium tracking-wide text-accent-200">
               <span className="relative flex size-1.5">
                 <span className="absolute inline-flex size-full animate-[status-pulse_2.6s_ease-out_infinite] rounded-full bg-accent-400 opacity-55" />
@@ -97,10 +97,10 @@ export default function ProfileCard() {
               {profile.status}
             </span>
 
-            <h2 className="mt-2.5 font-display text-[1.5rem] font-semibold leading-[1.08] tracking-[-0.025em] text-fg lg:text-[1.72rem]">
+            <h2 className="mt-2.5 font-display text-[1.72rem] font-semibold leading-[1.08] tracking-[-0.025em] text-fg">
               {profile.name}
             </h2>
-            <p className="mt-1.5 text-[0.94rem] leading-snug text-dim lg:text-[1rem]">
+            <p className="mt-1.5 text-[1rem] leading-snug text-dim">
               {profile.role} <span className="text-accent-400">{profile.roleAccent}</span>
             </p>
           </div>
@@ -122,7 +122,7 @@ export default function ProfileCard() {
           {META.map(({ icon, key, link }) => {
             const Icon = metaIcon[icon]
             const value = profile[key]
-            const body = <span className="text-[0.92rem] leading-snug lg:text-[0.94rem]">{value}</span>
+            const body = <span className="text-[0.94rem] leading-snug">{value}</span>
 
             return (
               <li key={key} className="flex items-start gap-2.5">

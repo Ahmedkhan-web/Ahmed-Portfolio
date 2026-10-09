@@ -29,7 +29,7 @@ export default function Projects() {
   return (
     <section
       id="projects"
-      className="relative w-full scroll-mt-gutter px-5 pr-[var(--nav-clearance)] py-rhythm-lg sm:px-8 sm:pr-[var(--nav-clearance)] lg:px-10 lg:pr-10"
+      className="relative w-full scroll-mt-gutter px-5 py-rhythm-lg sm:px-8 lg:px-10 lg:pr-10"
     >
       <SectionHeading
         eyebrow={projects.eyebrow}

@@ -73,8 +73,13 @@ export default function App() {
       {/* `flex-col` below `lg`, so the card is the first block in normal flow
           and the sections follow it — which is exactly the mobile layout this
           page had before the shell was introduced, from one DOM node rather than
-          two conditionally-rendered copies. */}
-      <div className="mx-auto flex w-full max-w-[1480px] flex-col lg:flex-row lg:pl-12 lg:pr-[var(--nav-clearance-lg)]">
+          two conditionally-rendered copies.
+
+          `pt-14` on phones reserves the height of the fixed mobile top bar, so
+          the card begins beneath it rather than under its translucent strip. At
+          `lg` the bar is gone and the rail takes over, so the padding is
+          dropped. */}
+      <div className="mx-auto flex w-full max-w-[1480px] flex-col pt-14 lg:flex-row lg:pt-0 lg:pl-12 lg:pr-[var(--nav-clearance-lg)]">
         {/* ---- The pinned left column -----------------------------------
             `lg:sticky lg:top-0 lg:h-svh lg:items-center` inside a flex row.
 
@@ -112,14 +117,12 @@ export default function App() {
             which is how the portrait-crop check came to measure a `display: none`
             frame as 0x0 and report it as a broken avatar. One node, positioned
             by CSS, cannot fail either way. */}
-        {/* Below `lg` the card needs the rail's strip reserved on its right
-            edge, exactly as the hero does. The card is `max-w-[27rem]`, which at
-            a 390px viewport is wider than the space between the page gutter and
-            the rail — without this the chip row and the Hire Me button slid
-            underneath it. At `lg` the padding is dropped because the shell's own
-            `lg:pr-[var(--nav-clearance-lg)]` already handles it, and the column
-            becomes a full-height centred box. */}
-        <div className="flex shrink-0 justify-center px-5 pr-[var(--nav-clearance)] pt-gutter sm:px-8 sm:pr-[var(--nav-clearance)] lg:sticky lg:top-0 lg:h-svh lg:items-center lg:self-start lg:px-0 lg:pr-0 lg:pt-0 xl:pr-4">
+        {/* Below `lg` the rail is gone, so the card needs no strip reserved on
+            its right edge — the page gutters are symmetric now and the card sits
+            centred in the full column. At `lg` the padding is dropped because the
+            shell's own `lg:pr-[var(--nav-clearance-lg)]` reserves the rail's
+            space, and the column becomes a full-height centred box. */}
+        <div className="flex shrink-0 justify-center px-5 pt-gutter sm:px-8 lg:sticky lg:top-0 lg:h-svh lg:items-center lg:self-start lg:px-0 lg:pr-0 lg:pt-0 xl:pr-4">
           <ProfileCard />
         </div>
 

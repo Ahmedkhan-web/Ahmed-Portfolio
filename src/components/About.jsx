@@ -7,7 +7,7 @@ export default function About() {
   return (
     <section
       id="about"
-      className="relative flex min-h-svh w-full scroll-mt-gutter flex-col justify-center px-5 pr-[var(--nav-clearance)] py-rhythm-lg sm:px-8 sm:pr-[var(--nav-clearance)] lg:px-10 lg:pr-10"
+      className="relative flex min-h-svh w-full scroll-mt-gutter flex-col justify-center px-5 py-rhythm-lg sm:px-8 lg:px-10 lg:pr-10"
     >
       <SectionHeading
         eyebrow={about.eyebrow}

@@ -5,7 +5,7 @@ import SectionHeading from './ui/SectionHeading.jsx'
 
 export default function Skills() {
   return (
-    <section id="skills" className="relative w-full scroll-mt-gutter px-5 pr-[var(--nav-clearance)] py-rhythm-lg sm:px-8 sm:pr-[var(--nav-clearance)] lg:px-10 lg:pr-10">
+    <section id="skills" className="relative w-full scroll-mt-gutter px-5 py-rhythm-lg sm:px-8 lg:px-10 lg:pr-10">
       <SectionHeading eyebrow={skills.eyebrow} lines={skills.headline} accentLine={1} lede={skills.summary} rule delay={40} />
 
       <ul className="mx-auto mt-rhythm-md grid w-full max-w-section gap-3.5 sm:grid-cols-2">

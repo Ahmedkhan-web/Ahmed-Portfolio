@@ -43,7 +43,7 @@ export default function Hero() {
        it into a jump. */
     <section
       id="hero"
-      className="relative flex min-h-svh w-full scroll-mt-gutter flex-col justify-center px-5 pr-[var(--nav-clearance)] py-gutter sm:px-8 sm:pr-[var(--nav-clearance)] lg:px-10 lg:pr-10"
+      className="relative flex min-h-svh w-full scroll-mt-gutter flex-col justify-center px-5 py-gutter sm:px-8 lg:px-10 lg:pr-10"
     >
       {/* The content column, centred on its own axis. `items-center` centres
           every block below as well as the text inside it, so the badge, headline,
