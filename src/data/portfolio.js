@@ -17,14 +17,18 @@ import {
   ArrowRight,
   Brain,
   Briefcase,
+  Cloud,
+  ExternalLink,
   FolderGit2,
   FlaskConical,
   Gauge,
   Globe,
   House,
   Layers,
+  Layout,
   Mail,
   Send,
+  Server,
   ShieldCheck,
   Sparkles,
   User,
@@ -32,6 +36,11 @@ import {
 } from 'lucide-react'
 
 import portrait from '@/assets/portrait.jpg'
+import aiChatbotImage from '@/assets/projects/ai-chatbot.jpg'
+import balochistanServicesImage from '@/assets/projects/balochistan-services.jpg'
+import canadaEximImage from '@/assets/projects/canada-exim.jpg'
+import ecommerceSiteImage from '@/assets/projects/ecommerce-site.jpg'
+import weatherAppImage from '@/assets/projects/weather-app.jpg'
 
 /* ---------------------------------------------------------------------------
  *  PROFILE
@@ -51,6 +60,7 @@ export const profile = {
      width, including the narrowest phone. The hero CTAs below carry the longer,
      more expressive phrasing. */
   hireMeLabel: 'Hire Me',
+  whatsapp: '923333558317',
 }
 
 /* ---------------------------------------------------------------------------
@@ -63,10 +73,10 @@ export const profile = {
  *  non-focusable element (no href), so there are no dead links on the page.
  * -------------------------------------------------------------------------*/
 export const socials = [
-  { label: 'GitHub', icon: 'github', url: '' }, // TODO: https://github.com/<your-handle>
+  { label: 'GitHub', icon: 'github', url: 'https://github.com/ahmedkhan-web' },
   { label: 'LinkedIn', icon: 'linkedin', url: '' }, // TODO: https://linkedin.com/in/<your-handle>
   { label: 'X', icon: 'x', url: '' }, // TODO: https://x.com/<your-handle>
-  { label: 'WhatsApp', icon: 'whatsapp', url: '' }, // TODO: https://wa.me/<your-number>
+  { label: 'WhatsApp', icon: 'whatsapp', url: `https://wa.me/${profile.whatsapp}` },
 ]
 
 /* ---------------------------------------------------------------------------
@@ -74,8 +84,8 @@ export const socials = [
  *  `id` doubles as the anchor target and the label shown in the tooltip.
  *  Adding a section is one line here plus its <section> — there is no scroll
  *  container to wire up, because the document is the only scroller and every
- *  section is already in its flow. TODO(ahmed): projects, skills, ai-lab,
- *  contact are the remaining four; their icons are imported and ready below.
+ *  section is already in its flow. TODO(ahmed): projects, ai-lab and contact are
+ *  the remaining three; their icons are imported and ready below.
  * -------------------------------------------------------------------------*/
 /* The rail lists exactly the sections that exist on the page. Sections that are
    not built yet are left out rather than rendered as dead links — an icon that
@@ -87,13 +97,16 @@ export const socials = [
 export const navItems = [
   { id: 'hero', label: 'Home', icon: House },
   { id: 'about', label: 'About', icon: User },
+  { id: 'skills', label: 'Skills', icon: Wrench },
   { id: 'experience', label: 'Experience', icon: Briefcase },
+  { id: 'projects', label: 'Projects', icon: FolderGit2 },
+  { id: 'contact', label: 'Contact', icon: Send },
 ]
 
 /* Icons for the sections still to be built, so the imports above are not dead
    code and the next section only needs its data entry. TODO(ahmed): projects,
-   skills, ai-lab, contact. */
-export const navIconsPending = { projects: FolderGit2, skills: Wrench, 'ai-lab': FlaskConical, contact: Send }
+   ai-lab, contact. */
+export const navIconsPending = { 'ai-lab': FlaskConical }
 
 /* ---------------------------------------------------------------------------
  *  ABOUT
@@ -246,6 +259,158 @@ export const experience = {
 }
 
 /* ---------------------------------------------------------------------------
+ *  SKILLS
+ * ---------------------------------------------------------------------------
+ *  Four groups, one per layer of the stack, each with the tools that act on it.
+ *
+ *  WHY THIS IS NOT THE INVENTORY ABOUT USED TO CARRY. That band was a list of
+ *  tools, and the same tools were already printed under every role in
+ *  Experience, in the same pills — so it read as the section above repeating
+ *  itself. What is here is a different claim in a different shape: a tool says
+ *  what was used, a group says which layer the work happens on and what it is
+ *  for. The tools are grouped by the layer they act on rather than run together
+ *  as one long comma-separated run, because "tools" as a single list is the one
+ *  arrangement that says nothing at all.
+ *
+ *  WHICH IS WHY IT SITS BEFORE EXPERIENCE. In this order the page argues
+ *  who → what the working set is → here it is being used. Placed after the
+ *  timeline it would be a summary of the rows above it, which is the
+ *  duplication the old band was removed for.
+ *
+ *  THE TOOL NAMES ARE THE SAME ONES THE TIMELINE USES. `experience.roles[].stack`
+ *  is where the claim is actually made, role by role; this section groups those
+ *  names by layer so the reader can see the shape of the practice in one screen.
+ *  A name that appears here and not there is a name to check.
+ *
+ *  TODO(ahmed): read these before publishing, same as the stacks below. Every
+ *  name is either asserted in `experience` or is an obvious member of the same
+ *  toolset; nothing here is a percentage, a rating or a claimed number of years
+ *  with a tool, because none of that has been supplied. If a tool is not
+ *  something you would want to be asked about in an interview, delete it here.
+ * -------------------------------------------------------------------------*/
+export const skills = {
+  eyebrow: 'Skills',
+
+  /* Two lines rather than three. About and Experience both run to three, and a
+     third line here would push the grid — the only thing in this section worth
+     scrolling to — below the fold on a laptop. */
+  headline: ['A focused stack for', 'products that need to last.'],
+
+  /* One sentence, and it is the argument: not a list of tools but the reason
+     the list is cut this way. */
+  summary: 'Four disciplines, brought together to take a product from its first interface to a dependable release.',
+
+  groups: [
+    {
+      icon: 'layout',
+      title: 'Frontend',
+      body: 'Interfaces that stay legible at every width — semantic markup, typed props, and a layout that holds from a 360px phone up.',
+      tools: ['React', 'TypeScript', 'JavaScript', 'Tailwind CSS', 'Vite', 'HTML', 'CSS'],
+    },
+    {
+      icon: 'server',
+      title: 'Backend',
+      body: 'Schema, API and the failure handling around them, so the service is still maintainable a year after it shipped.',
+      tools: ['Node.js', 'REST APIs', 'PostgreSQL', 'MySQL'],
+    },
+    {
+      icon: 'brain',
+      title: 'AI & Data',
+      body: 'Language models inside real product surfaces, with the failure modes designed for up front rather than discovered in production.',
+      tools: ['LLM APIs', 'Prompt engineering', 'RAG pipelines', 'Vector search'],
+    },
+    {
+      icon: 'cloud',
+      title: 'Platform',
+      body: 'Build, deploy, and the observability that says whether it is actually working in someone’s hands.',
+      tools: ['AWS', 'Docker', 'CI/CD', 'Git'],
+    },
+  ],
+}
+
+/* ---------------------------------------------------------------------------
+ *  PROJECTS
+ * -------------------------------------------------------------------------*/
+export const projects = {
+  eyebrow: 'Projects',
+  headline: ['Selected builds with', 'real product shape.'],
+  summary:
+    'A focused set of shipped interfaces, ordered by strength and business weight rather than treated as equal thumbnails.',
+  items: [
+    {
+      title: 'CanadaExim',
+      url: 'https://canadaexim.com/',
+      image: canadaEximImage,
+      imageAlt: 'First screen of the CanadaExim commodity trading website',
+      type: 'Trade platform',
+      role: 'Full website build',
+      summary:
+        'A premium commodity trading and logistics presence with a strong hero, conversion paths, buyer and supplier flows, and trust-led positioning.',
+      stack: ['React', 'Tailwind CSS', 'Responsive UI', 'Lead flow'],
+      featured: true,
+    },
+    {
+      title: 'Balochistan Standard Services',
+      url: 'https://balochistan-services.vercel.app/',
+      image: balochistanServicesImage,
+      imageAlt: 'First screen of the Balochistan Standard Services website',
+      type: 'Service business',
+      role: 'Product and service website',
+      summary:
+        'A fire safety and security website designed around product discovery, service requests, and clear credibility for commercial buyers.',
+      stack: ['React', 'Vercel', 'Service UI', 'Responsive layout'],
+      featured: true,
+    },
+    {
+      title: 'AI Assistant',
+      url: 'https://ai-chat-boot-nu.vercel.app/',
+      image: aiChatbotImage,
+      imageAlt: 'First screen of the AI Assistant chat interface',
+      type: 'AI interface',
+      role: 'Chat product prototype',
+      summary:
+        'A clean AI chat surface with prompt shortcuts, message input, and a focused assistant layout for fast experimentation.',
+      stack: ['React', 'AI UI', 'Prompt UX'],
+    },
+    {
+      title: 'Weather Finder',
+      url: 'https://ahmedkhan-web.github.io/weather-app/',
+      image: weatherAppImage,
+      imageAlt: 'First screen of the Weather Finder app',
+      type: 'Utility app',
+      role: 'Frontend app',
+      summary:
+        'A compact weather search experience built around one clear task: enter a city, get the forecast, keep the interface light.',
+      stack: ['JavaScript', 'API UI', 'CSS'],
+    },
+    {
+      title: 'Proship Ecommerce',
+      url: 'https://ahmedkhan-web.github.io/Ecommerce-Web-site/',
+      image: ecommerceSiteImage,
+      imageAlt: 'First screen of the Proship ecommerce website',
+      type: 'Ecommerce concept',
+      role: 'Marketing storefront',
+      summary:
+        'A storefront concept for technology products, with a bold opening screen, product navigation, and a direct shopping CTA.',
+      stack: ['HTML', 'CSS', 'JavaScript'],
+    },
+  ],
+}
+
+/* ---------------------------------------------------------------------------
+ *  CONTACT
+ * -------------------------------------------------------------------------*/
+export const contact = {
+  eyebrow: 'Contact',
+  headline: ['Tell me what you need', 'and I will reply fast.'],
+  summary:
+    'Send a project note straight to WhatsApp. The form formats the message for you, so the conversation starts with the useful details already included.',
+  whatsapp: profile.whatsapp,
+  directLabel: 'Message on WhatsApp',
+  emailLabel: profile.email,
+}
+
+/* ---------------------------------------------------------------------------
  *  HERO
  *  Deliberately short. The headline, one animated line, two calls to action and
  *  the four numbers below do the work; there are no paragraphs and no capability
@@ -296,12 +461,12 @@ export const hero = {
      Projects" while linking here, because the Projects section does not exist
      yet — a label that disagrees with its destination is worse than no link at
      all, and it fails for anyone who cannot see where the link goes. */
-  primaryCta: { label: 'Explore Experience', href: '#experience' },
+  primaryCta: { label: 'View Projects', href: '#projects' },
   /* A mailto rather than an anchor. "Let's Talk" pointed at #contact, a section
      that does not exist — a button that scrolls nowhere is a dead end. Swap it
      back to an anchor in the same commit that builds the Contact section; the
      anchor will work as it stands, because there is no inner scroller to defeat. */
-  secondaryCta: { label: 'Let’s Talk', href: `mailto:${profile.email}` },
+  secondaryCta: { label: 'Let’s Talk', href: '#contact' },
 
   /* The four numbers under the buttons, in the order they are read.
      Each value counts up from zero when the row enters the viewport.
@@ -325,8 +490,14 @@ export const hero = {
 export const arrowIcon = ArrowRight
 export const metaIcon = { email: Mail, location: Globe, work: Briefcase }
 export const sparkleIcon = Sparkles
+export const externalIcon = ExternalLink
 
 /* Capability card icons for the About section, keyed by the `icon` field there.
    Listed explicitly rather than resolved by string so a typo fails at build time
    instead of rendering an empty card. */
 export const capabilityIcon = { layers: Layers, brain: Brain, gauge: Gauge, shield: ShieldCheck }
+
+/* The same arrangement for the Skills groups. `brain` is deliberately the same
+   component About uses for AI integration — it is the same idea at a different
+   scale, and two icons for one idea would be the page inventing a distinction. */
+export const skillIcon = { layout: Layout, server: Server, brain: Brain, cloud: Cloud }

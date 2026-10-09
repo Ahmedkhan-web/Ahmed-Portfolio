@@ -26,7 +26,11 @@ export default function ProfileCard() {
          predictable — which is what lets the shell centre it on the viewport. */
       className="w-full max-w-[27rem] lg:w-[var(--card-w)] lg:max-w-none lg:shrink-0"
     >
-      <div className="glass-panel rounded-[22px] border border-white/[0.07] p-4 shadow-[0_36px_90px_-40px_rgba(0,0,0,0.95)] sm:p-5 lg:rounded-[26px] lg:p-6">
+      <div className="glass-panel relative overflow-hidden rounded-[22px] border border-white/[0.07] p-4 shadow-[0_36px_90px_-40px_rgba(0,0,0,0.95)] sm:p-5 lg:rounded-[26px] lg:p-6">
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-20 -top-20 size-44 rounded-full bg-accent-400/[0.08] blur-3xl"
+        />
         {/* ---- Identity header -------------------------------------------
             Phones lay it on its side — circle beside the name — because a
             stacked card is far taller than a phone needs. From `lg` the card
@@ -187,12 +191,12 @@ export default function ProfileCard() {
         {/* ---- Primary action -------------------------------------------- */}
         <div className="mt-4">
           <Button
-            href={`mailto:${profile.email}`}
+            href="#contact"
             variant="primary"
             size="md"
             spread
             iconEnd={ArrowRight}
-            aria-label={`${profile.hireMeLabel} — email ${profile.email}`}
+            aria-label={`${profile.hireMeLabel} - open contact section`}
           >
             {profile.hireMeLabel}
           </Button>

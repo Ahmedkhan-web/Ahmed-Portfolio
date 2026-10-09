@@ -48,15 +48,16 @@ export default function NavRail() {
 
   return (
     <nav aria-label="Primary" className="nav-rail">
-      <ul className="glass-rail flex flex-col items-center gap-0.5 rounded-full border border-edge/80 p-1 shadow-xl lg:gap-1 lg:p-2.5">
+      <ul className="glass-rail flex flex-col items-center gap-1 rounded-full border border-edge/80 p-1.5 shadow-[0_18px_50px_-22px_rgba(0,0,0,0.9)] lg:gap-1.5 lg:p-2.5">
         {navItems.map((item) => (
           <li key={item.id}>
             <a
               href={`#${item.id}`}
+              aria-label={item.label}
               aria-current={active === item.id ? 'page' : undefined}
               title={item.label}
               data-active={active === item.id}
-              className="group relative grid size-8 place-items-center rounded-full text-dim transition-colors hover:bg-white/5 hover:text-fg lg:size-10"
+              className="group relative grid size-8 place-items-center rounded-full text-dim transition-[background-color,color,box-shadow] duration-300 hover:bg-white/[0.06] hover:text-fg data-[active=true]:bg-accent-400/[0.13] data-[active=true]:text-accent-200 data-[active=true]:shadow-[inset_0_0_0_1px_rgba(52,211,153,0.13)] lg:size-10"
             >
               <span
                 aria-hidden="true"

@@ -3,7 +3,7 @@ import { useCallback, useLayoutEffect, useRef } from 'react'
 import useReducedMotion from './useReducedMotion.js'
 
 /* ============================================================================
- *  REVEAL — entrance primitive, played on every arrival in the viewport.
+ *  REVEAL — entrance primitive, played once per page load.
  *  ----------------------------------------------------------------------------
  * Wraps any element in the shared rise-and-fade entrance, held back by `delay`
  * ms so the parts of a block land in order.
@@ -15,38 +15,35 @@ import useReducedMotion from './useReducedMotion.js'
  * whole page at once — so About and Experience would each finish their stagger
  * below the fold and simply be sitting there when the reader arrived.
  *
- *  EVERY TIME, NOT ONLY THE FIRST. The observer is never disconnected, and it
- * drives the element in both directions: arriving marks it `data-reveal="done"`
- * and starts the entrance, leaving takes the attribute away again and puts the
- * element back in its pending state. A section therefore assembles every time
- * the reader comes back to it, which is what a section that is *arrived at*
- * rather than scrolled past should do — the first arrival is not more
- * significant than the fifth, and a page whose About section is fully settled
- * while the reader is in Experience has quietly told them there is nothing to
- * come back to.
+ *  ONCE, THEN NEVER AGAIN. The observer is disconnected the moment the element
+ * arrives, and the attribute is never taken back off. A section therefore
+ * assembles a single time, the first time the reader reaches it, and is settled
+ * for the rest of the visit — scrolling past it and coming back slides past
+ * finished content instead of re-running the whole stagger. The entrance is a
+ * greeting, and a greeting the reader has already been given does not repeat
+ * itself every time they glance back at the door.
  *
- *  The reset is deliberately tied to the observer rather than to the direction
- * of the scroll: an element is re-armed when it is out of view, not when the
- * reader moves up. That is what stops a small scroll inside a section from
- * blanking half of it, and it is why the callback reads `isIntersecting` rather
- * than `boundingClientRect.deltaY`.
+ *  The page load is the boundary of that. Nothing is written to storage, so a
+ * reload starts the entrances over: each visit to the page is a fresh read from
+ * the top, and it should look like one.
  *
- *  Re-arming works because the entrance is a CSS animation bound to the
- * attribute's presence. An attribute that is added, removed and added again
- * restarts the animation; setting it to a value it already holds does not. So
- * `arrive` is idempotent while it is in view, and the animation only replays
- * after a reset has genuinely undone it.
+ *  BECAUSE NOTHING RE-ARMS, the observer only ever has to answer one question —
+ * has this been seen yet — so the callback acts on a single intersection and
+ * ignores every report after it. An element that has not arrived is left
+ * observed rather than resolved: a first callback reporting "not yet" is not a
+ * verdict, and treating it as one would hide the block permanently, since the
+ * pending state is `opacity: 0`. It waits for the intersection that counts.
  *
  *  ABOVE THE FOLD ON LOAD. Measured rather than observed, in a layout effect, so
  * it happens before the first paint. The hero and the pinned card are on screen
  * the moment the page loads and must begin their entrance on that same frame;
  * waiting for the observer's first callback would hold the hero invisible for a
  * frame and shift its stagger by however long the browser took to deliver it.
- * The observer is attached anyway, so the hero replays like everything else.
+ * Having arrived by measurement, they need no observer at all.
  *
  *  NO STATE, NO RENDERS. The attribute is written to the node directly. A
- * `useState` here would re-render this element's whole subtree every time it
- * arrived or reset — which is exactly the subtree that is animating.
+ * `useState` here would re-render this element's whole subtree at the moment it
+ * arrives — which is exactly the subtree that is animating.
  *
  *  REDUCED MOTION. `prefers-reduced-motion` is honoured in two places. The
  * stylesheet empties the pending state and collapses every duration, so nothing
@@ -70,10 +67,6 @@ export default function Reveal({
     if (nodeRef.current) nodeRef.current.dataset.reveal = 'done'
   }, [])
 
-  const reset = useCallback(() => {
-    if (nodeRef.current) delete nodeRef.current.dataset.reveal
-  }, [])
-
   useLayoutEffect(() => {
     const node = nodeRef.current
     if (!node || reduced) return
@@ -83,7 +76,10 @@ export default function Reveal({
        that strip is not on screen even though its rect is inside the number. */
     const height = document.documentElement.clientHeight
     const rect = node.getBoundingClientRect()
-    if (rect.top < height && rect.bottom > 0) arrive()
+    if (rect.top < height && rect.bottom > 0) {
+      arrive()
+      return
+    }
 
     /* Nothing here can afford to fail silently: the pending state is
        `opacity: 0`, so a block that never arrives never becomes visible. If the
@@ -106,32 +102,23 @@ export default function Reveal({
        fully on screen. `threshold: 0` because the decision is made by the margin,
        not by how much of the element is showing.
 
-       TWO STATES, AND THE RECT DECIDES BETWEEN THEM. `isIntersecting` alone is
-       not enough, for a reason this file's own animation causes: the entrance
-       translates the element by `--reveal-y` (22px), so while it plays, the
-       element sits 22px higher than where it comes to rest — and for a block
-       resting just below the margin, that is the difference between inside the
-       trigger line and outside it. Observed on the chapter rule: it arrived at
-       the top of the fold, played, came to rest 22px lower, was reported as no
-       longer intersecting, and was re-armed — a block that animated in and then
-       disappeared. So a block is arrived when the observer says it is in view
-       *or* when it is simply wholly on screen, and it is re-armed only once its
-       own rect has left the viewport altogether. Nothing visible is ever hidden,
-       and nothing hidden is ever left visible. */
+       DISCONNECTED ON ARRIVAL, which is what makes this a one-shot. The observer
+       was previously left running in both directions so that leaving a block
+       would re-arm it and returning would replay the entrance — and that is the
+       behaviour this file no longer wants. A block that has been seen is done,
+       and the cheapest way to be sure it stays done is to stop asking. */
     const observer = new IntersectionObserver(
       ([entry]) => {
-        const box = entry.boundingClientRect
-        const vh = document.documentElement.clientHeight
-
-        if (entry.isIntersecting || (box.top >= 0 && box.bottom <= vh)) arrive()
-        else if (box.bottom <= 0 || box.top >= vh) reset()
+        if (!entry.isIntersecting) return
+        arrive()
+        observer.disconnect()
       },
-      { threshold: 0, rootMargin: '0px 0px -10% 0px' },
+      { threshold: 0, rootMargin: '0px 0px 12% 0px' },
     )
 
     observer.observe(node)
     return () => observer.disconnect()
-  }, [arrive, reset, reduced])
+  }, [arrive, reduced])
 
   return (
     <Tag

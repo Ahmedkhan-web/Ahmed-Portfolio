@@ -149,7 +149,7 @@ const sample = async (group) => {
     measure('aside p', 'card role'),
     measure('aside a[href^="mailto:"]', 'card email link', { index: 0 }),
     measure('aside a[aria-label^="Hire Me"]', 'Hire Me button label', { min: 4.5 }),
-    measure('[data-typed] > span:last-child', 'typed line (rendered chars)', { inset: 0.2 }),
+    measure('#hero p.font-mono', 'hero support line', { inset: 0.2 }),
     /* The two halves of a stat: the large figure and its micro-label under it.
        `inset: 0.3` trims the row above, which on the figure is the headline and
        on the label is the figure itself. */
@@ -193,7 +193,22 @@ const sample = async (group) => {
     ]
   }
 
-  return [
+  if (group === 'skills') {
+    return [
+      measure('#skills header span.font-mono', 'skills eyebrow', { inset: 0.2, min: 4.5 }),
+      measure('#skills h2 > span', 'skills headline (accent)', { index: 1, inset: 0.25, min: 3 }),
+      measure('#skills p', 'skills lede', { index: 0, inset: 0.2 }),
+      measure('#skills h3', 'skills group title', { index: 0, inset: 0.2, min: 3 }),
+      measure('#skills li p', 'skills group body', { index: 0, inset: 0.2 }),
+      /* The tool list is 11px mono in the accent — the same colour and size
+         register as the timeline periods, but on its own hairline rather than on
+         a card, so it is measured here rather than assumed from that check. */
+      measure('#skills li ul li', 'skills tool name', { index: 0, inset: 0.2, min: 4.5 }),
+    ]
+  }
+
+  if (group === 'experience') {
+    return [
     measure('#experience header span.font-mono', 'experience eyebrow', { inset: 0.2, min: 4.5 }),
     measure('#experience h2 > span', 'experience headline', { index: 0, inset: 0.25, min: 3 }),
     measure('#experience p.font-mono', 'timeline period', { index: 0, inset: 0.2, min: 4.5 }),
@@ -202,6 +217,27 @@ const sample = async (group) => {
     measure('#experience ol p', 'timeline summary', { index: 2, inset: 0.2 }),
     measure('#experience ol li li', 'timeline responsibility', { index: 0, inset: 0.2 }),
     measure('#experience ol ul[aria-label^="Technologies"] li', 'technology chip', { index: 0, inset: 0.2, min: 4.5 }),
+    ]
+  }
+
+  if (group === 'projects') {
+    return [
+      measure('#projects header span.font-mono', 'projects eyebrow', { inset: 0.2, min: 4.5 }),
+      measure('#projects h2 > span', 'projects headline', { index: 0, inset: 0.25, min: 3 }),
+      measure('#projects p', 'projects lede', { index: 0, inset: 0.2 }),
+      measure('#projects [data-project-title]', 'project title', { index: 0, inset: 0.2, min: 3 }),
+      measure('#projects [data-project-description]', 'project description', { index: 0, inset: 0.2 }),
+      measure('#projects article button span.font-mono', 'project meta label', { index: 0, inset: 0.2, min: 4.5 }),
+    ]
+  }
+
+  return [
+    measure('#contact header span.font-mono', 'contact eyebrow', { inset: 0.2, min: 4.5 }),
+    measure('#contact h2 > span', 'contact headline', { index: 0, inset: 0.25, min: 3 }),
+    measure('#contact p', 'contact lede', { index: 0, inset: 0.2 }),
+    measure('#contact h3', 'contact card title', { index: 0, inset: 0.2, min: 3 }),
+    measure('#contact label span', 'contact field label', { index: 0, inset: 0.2, min: 4.5 }),
+    measure('#contact button', 'contact submit button', { index: 0, inset: 0.2, min: 4.5 }),
   ]
 }, { b64, group })
 }
@@ -225,7 +261,7 @@ const results = [...(await sample('hero'))]
    is reported as NOT FOUND — a failure — rather than quietly dropped. The old
    single pass could not tell the difference between "no contrast" and "not
    photographed", and reported both as 1.04. */
-for (const id of ['about', 'experience']) {
+for (const id of ['about', 'skills', 'experience', 'projects', 'contact']) {
   /* Scoped to what is on screen, because a scroll only reveals what arrives in
      the viewport; waiting on the whole section would time out on the rows that
      are still below the fold. The predicate has to ask about the reveals

@@ -436,9 +436,9 @@
    cascade origin than any hover rule, so an element could never respond to a
    hover state that wanted its own transform.
 
-   The observer disconnects when the element unmounts, and nothing else: it is
-   not closed on arrival, so leaving the viewport takes `data-reveal` back off
-   and the entrance is armed again for the next time the reader comes to it. */
+   The observer disconnects on arrival and is never re-armed, so the entrance
+   plays once per page load: a block that has been seen keeps its `data-reveal`
+   and is settled for the rest of the visit. */
 @utility reveal {
   opacity: 0;
 

@@ -1,8 +1,11 @@
 import About from './components/About.jsx'
+import Contact from './components/Contact.jsx'
 import Experience from './components/Experience.jsx'
 import Hero from './components/Hero.jsx'
 import NavRail from './components/NavRail.jsx'
 import ProfileCard from './components/ProfileCard.jsx'
+import Projects from './components/Projects.jsx'
+import Skills from './components/Skills.jsx'
 import Backdrop from './components/ui/Backdrop.jsx'
 
 /* ---------------------------------------------------------------------------
@@ -131,7 +134,15 @@ export default function App() {
         <main aria-label="Content" className="min-w-0 flex-1">
           <Hero />
           <About />
+          {/* Between About and Experience, not after them: the page reads who →
+              what the working set is → here it is being used, and each section is
+              evidence for the one above it. Placed last, Skills would be a
+              summary of the timeline above it — the `stack` on every role is the
+              same list of names. */}
+          <Skills />
           <Experience />
+          <Projects />
+          <Contact />
         </main>
       </div>
     </div>

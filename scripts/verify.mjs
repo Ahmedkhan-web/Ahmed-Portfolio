@@ -66,7 +66,7 @@ const ok = (label, cond, detail = '') => {
   if (!cond) fails.push(label)
 }
 
-// ---- 0. Entrance is viewport-driven, and replays on every return ----------
+// ---- 0. Entrance is viewport-driven, and plays only once ------------------
 /* Four claims, and each one fails differently:
 
    1. AT LOAD, the blocks below the fold must still be hidden. A reveal that
@@ -76,17 +76,15 @@ const ok = (label, cond, detail = '') => {
    2. WHILE A BLOCK IS IN VIEW it must be fully visible and untransformed. This
       is sampled per scroll step rather than at the end of the walk, because a
       reveal that never fires leaves content permanently invisible and only the
-      walk tells the difference — and because an element that has been *passed*
-      is now expected to be hidden again, so an end-of-walk reading of the whole
-      page would be measuring the wrong thing.
-   3. LEAVING MUST RE-ARM. Scrolled past, a block takes its `data-reveal` off
-      again, which is what lets it play a second time. A reveal that stayed
-      `done` would pass every other check here while quietly breaking the one
-      behaviour the reader is meant to see.
-   4. THE SECOND PASS MUST ACTUALLY REPLAY — animations running again while the
-      blocks come back into view, rather than the whole page sliding past already
-      settled. Read as "did anything animate", not "is anything animating now":
-      by the time the walk finishes, nothing should be. */
+      walk tells the difference.
+   3. LEAVING MUST NOT RE-ARM. A block that has been seen keeps its
+      `data-reveal`, and that is what makes the entrance a one-shot: the reader
+      scrolls past About, comes back, and it is still there rather than
+      rebuilding itself from nothing.
+   4. THE SECOND PASS MUST PLAY NOTHING. Read as "did anything animate", not
+      "is anything animating now": by the time the walk finishes, nothing should
+      be — so the count is a peak taken during the walk, and it has to be zero
+      for the whole of the return journey. */
 {
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } })
   await page.goto(TARGET, { waitUntil: 'load' })
@@ -98,7 +96,7 @@ const ok = (label, cond, detail = '') => {
        is no box to intersect against. */
     const below = [...document.querySelectorAll('.reveal')].filter((el) => {
       const r = el.getBoundingClientRect()
-      return r.top > document.documentElement.clientHeight || r.bottom < 0
+      return r.top > document.documentElement.clientHeight * 1.2 || r.bottom < 0
     })
     return {
       n: below.length,
@@ -106,7 +104,7 @@ const ok = (label, cond, detail = '') => {
       heroRunning: document.querySelectorAll('#hero .reveal[data-reveal="done"]').length,
     }
   })
-  ok('reveals below the fold are still hidden at load', belowFold.allHidden, `(${belowFold.n} waiting)`)
+  ok('reveals far below the fold are still hidden at load', belowFold.allHidden, `(${belowFold.n} waiting)`)
   ok('above-the-fold reveals have started on the first frame', belowFold.heroRunning > 0, `(${belowFold.heroRunning})`)
 
   /* Walk down the page the way a reader would — in steps, not one jump — so
@@ -119,7 +117,7 @@ const ok = (label, cond, detail = '') => {
      then rises for 720ms; a single reading has to be taken after all of that,
      or it reports pending blocks as failures. And whether anything is animating
      is only true during the animation, so asking once at the end of the wait
-     would always answer "no" and the replay claim would be untestable. */
+     would always answer "no" and the one-shot claim would be untestable. */
   const walk = async () =>
     page.evaluate(async () => {
       const d = document.scrollingElement
@@ -143,12 +141,11 @@ const ok = (label, cond, detail = '') => {
           await new Promise((r) => setTimeout(r, 80))
         }
 
-        /* Anything wholly on screen has to be showing, which is the invariant
-           that catches both directions of the re-arm: a block that animated in
-           and was then re-armed while still visible, and a block that was never
-           marked because a scroll step jumped it clean over the trigger line. A
-           block *partly* off the top is expected to be hidden again — that is
-           what passing it did. */
+        /* Anything wholly on screen has to be showing. This is the invariant
+           that catches a reveal which never fires, and a scroll step that jumped
+           a block clean over the trigger line — and, on the way back up, it
+           catches the opposite failure: a block that was re-armed while the
+           reader was looking straight at it. */
         const h = document.documentElement.clientHeight
         for (const el of document.querySelectorAll('.reveal')) {
           const r = el.getBoundingClientRect()
@@ -169,30 +166,31 @@ const ok = (label, cond, detail = '') => {
     first.failures.length === 0,
     first.failures.length ? first.failures.join(' | ') : `(${first.arrived} arrivals checked)`,
   )
+  ok('the first pass does animate the entrances', first.peakRunning > 0, `(${first.peakRunning} animations at peak)`)
 
   /* Back to the top, where the blocks that were passed are now far below the
-     fold again. They should have handed their `data-reveal` back. */
+     fold again. Having been seen, they must still be marked done. */
   await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }))
   await page.waitForTimeout(500)
-  const rearmed = await page.evaluate(() => {
+  const held = await page.evaluate(() => {
     const passed = [...document.querySelectorAll('#about .reveal, #experience .reveal')].filter(
       (el) => el.getBoundingClientRect().top > 0,
     )
     return {
       n: passed.length,
-      armed: passed.filter((el) => el.dataset.reveal === 'done').length,
+      done: passed.filter((el) => el.dataset.reveal === 'done').length,
     }
   })
   ok(
-    'a block that has been passed re-arms itself',
-    rearmed.n > 0 && rearmed.armed === 0,
-    `(${rearmed.armed}/${rearmed.n} still marked done)`,
+    'a block that has been passed stays revealed',
+    held.n > 0 && held.done === held.n,
+    `(${held.done}/${held.n} still marked done)`,
   )
 
   const second = await walk()
   ok(
-    'the second pass plays the entrances again',
-    second.peakRunning > 0 && second.failures.length === 0,
+    'the second pass replays nothing',
+    second.peakRunning === 0 && second.failures.length === 0,
     `(${second.peakRunning} animations at peak)`,
   )
   await page.close()
@@ -270,7 +268,7 @@ const ok = (label, cond, detail = '') => {
      out of the page. */
   const CTAS = [
     { label: 'Hire Me', name: /^Hire Me/, primary: false },
-    { label: 'Explore Experience', name: /^Explore Experience/, primary: true },
+    { label: 'View Projects', name: /^View Projects/, primary: true },
     { label: 'Let’s Talk', name: /Talk$/, primary: false },
   ]
 
@@ -313,11 +311,11 @@ const ok = (label, cond, detail = '') => {
   // #projects and that href is now data-driven, so a selector hard-coded to it
   // fails the moment the anchor changes — which it did when the button was
   // repointed at a section that actually exists.
-  const arrow = page.getByRole('link', { name: /^Explore Experience/ }).locator('svg')
+  const arrow = page.getByRole('link', { name: /^View Projects/ }).locator('svg')
   await page.mouse.move(2, 2)
   await page.waitForTimeout(420)
   const arrowBefore = await arrow.evaluate((el) => getComputedStyle(el).transform)
-  const primaryBox = await page.getByRole('link', { name: /^Explore Experience/ }).boundingBox()
+  const primaryBox = await page.getByRole('link', { name: /^View Projects/ }).boundingBox()
   await page.mouse.move(primaryBox.x + primaryBox.width / 2, primaryBox.y + primaryBox.height / 2)
   await page.waitForTimeout(450)
   const arrowAfter = await arrow.evaluate((el) => getComputedStyle(el).transform)
@@ -393,7 +391,7 @@ const ok = (label, cond, detail = '') => {
       pinnedTransforms: [card, rail, backdrop].map((el) => getComputedStyle(el).transform),
       rails: document.querySelectorAll('nav[aria-label="Primary"]').length,
       profiles: document.querySelectorAll('aside[aria-label="Profile"]').length,
-      sections: ['hero', 'about', 'experience'].map((id) => {
+      sections: ['hero', 'about', 'skills', 'experience', 'projects', 'contact'].map((id) => {
         const el = document.getElementById(id)
         /* Document-absolute top, not `offsetTop`: that is measured against the
            nearest positioned ancestor, which is not the scroller here. */
@@ -428,7 +426,7 @@ const ok = (label, cond, detail = '') => {
   ok('there is exactly one navigation rail', pinned.rails === 1, `(${pinned.rails})`)
   ok('there is exactly one profile card', pinned.profiles === 1, `(${pinned.profiles})`)
   ok(
-    'hero, about and experience all exist',
+    'all page sections exist',
     pinned.sections.every((s) => s.exists),
     pinned.sections.map((s) => `${s.id}:${s.exists ? 'yes' : 'MISSING'}`).join(' '),
   )
@@ -532,13 +530,17 @@ const ok = (label, cond, detail = '') => {
   // ---- 4. Placeholder socials must not be focusable links -----------------
   const social = await page.evaluate(() => {
     const spans = [...document.querySelectorAll('aside span[title]')]
+    const links = [...document.querySelectorAll('aside ul[aria-label="Social profiles"] a')]
     return {
       count: spans.length,
+      linkCount: links.length,
+      hrefs: links.map((a) => a.getAttribute('href')),
       allUnlinked: spans.every((s) => s.tagName === 'SPAN' && !s.closest('a')),
       focusable: spans.filter((s) => s.tabIndex >= 0).length,
     }
   })
-  ok('4 social placeholders present', social.count === 4, `(${social.count})`)
+  ok('2 social links are live', social.linkCount === 2, `(${social.linkCount}) ${social.hrefs.join(',')}`)
+  ok('2 social placeholders remain for missing URLs', social.count === 2, `(${social.count})`)
   ok('placeholders are inert spans, not links', social.allUnlinked)
   ok('no placeholder is keyboard focusable', social.focusable === 0)
 
@@ -620,6 +622,10 @@ const ok = (label, cond, detail = '') => {
     [...document.querySelectorAll('a[href^="mailto:"]')].map((a) => a.getAttribute('href')),
   )
   ok('mailto targets are valid', mail.length > 0 && mail.every((m) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(m)), mail.join(','))
+  const whatsapp = await page.evaluate(() =>
+    [...document.querySelectorAll('a[href^="https://wa.me/"]')].map((a) => a.getAttribute('href')),
+  )
+  ok('WhatsApp targets are valid', whatsapp.length > 0 && whatsapp.every((m) => /^https:\/\/wa\.me\/923333558317/.test(m)), whatsapp.join(','))
   await page.close()
 }
 
@@ -756,8 +762,8 @@ for (const s of [
    that this is when the section assembles, so a shot of it at scroll position
    zero would only ever show it waiting. */
 for (const { viewport: s, ids } of [
-  { viewport: { width: 1440, height: 900 }, ids: ['about', 'experience'] },
-  { viewport: { width: 390, height: 844 }, ids: ['about', 'experience'] },
+  { viewport: { width: 1440, height: 900 }, ids: ['about', 'experience', 'projects', 'contact'] },
+  { viewport: { width: 390, height: 844 }, ids: ['about', 'experience', 'projects', 'contact'] },
 ]) {
   const page = await browser.newPage({ viewport: s })
   await page.goto(TARGET, { waitUntil: 'load' })
